@@ -1,0 +1,140 @@
+SET(
+    syntax_H
+    # CABAD
+    CABAD/ArithmeticDecoder.h
+    CABAD/BinString.h
+    CABAD/CtxId.h
+    CABAD/Debinarizer.h
+    CABAD/Descriptors.h
+    CABAD/Init.h
+    CABAD/State.h
+    CABAD/Variable.h
+    # VLD
+    VLD/Descriptors.h
+    # SEI
+    SEI/BufferingPeriod.h
+    SEI/DecodedPictureHash.h
+    SEI/PayloadId.h
+    SEI/Payload.h
+    # Syntax
+    Aggregator.h
+    AccessUnitDelimiterRbsp.h
+    ByteAlignment.h
+    check.h
+    CodingQuadTree.h
+    CodingTreeUnit.h
+    CodingUnit.h
+    CrossCompPred.h
+    VLD/Descriptors.h
+    Element.h
+    ElementId.h
+    Embedded.h
+    EndOfBitstreamRbsp.h
+    EndOfSeqRbsp.h
+    FillerDataRbsp.h
+    Fwd.h
+    HrdParameters.h
+    QuadTree.h
+    MvdCoding.h
+    NalUnit.h
+    NalUnitHeader.h
+    Parser.h
+    PcmSample.h
+    PictureParameterSet.h
+    PpsMultilayerExtension.h
+    PpsRangeExtension.h
+    PredictionUnit.h
+    PredWeightTable.h
+    ProfileTierLevel.h
+    Rbsp.h
+    RbspSliceSegmentTrailingBits.h
+    RbspTrailingBits.h
+    RefPicListModification.h
+    ResidualCoding.h
+    SAO.h
+    ScalingListData.h
+    SeiMessage.h
+    SeiRbsp.h
+    SequenceParameterSet.h
+    ShortTermRefPicSet.h
+    SliceSegmentHeader.h
+    SliceSegmentData.h
+    SliceSegmentLayerRbsp.h
+    SubLayerHrdParameters.h
+    SpsMultilayerExtension.h
+    SpsRangeExtension.h
+    StreamNalUnit.h
+    Syntax.h
+    TransformTree.h
+    TransformUnit.h
+    VideoParameterSet.h
+    VuiParameters.h)
+
+SET(
+    syntax_SRC
+    # CABAD
+    CABAD/ArithmeticDecoder.cpp
+    CABAD/CtxId.cpp
+    CABAD/Debinarizer.cpp
+    CABAD/Init.cpp
+    CABAD/State.cpp
+    CABAD/Variable.cpp
+    # VLD
+    VLD/Descriptors.cpp
+    # SEI
+    SEI/BufferingPeriod.cpp
+    SEI/DecodedPictureHash.cpp
+    SEI/Payload.cpp
+    # Syntax
+    AccessUnitDelimiterRbsp.cpp
+    ByteAlignment.cpp
+    check.cpp
+    CodingQuadTree.cpp
+    CodingTreeUnit.cpp
+    CodingUnit.cpp
+    CrossCompPred.cpp
+    Descriptor.cpp
+    Element.cpp
+    ElementId.cpp
+    Embedded.cpp
+    EndOfBitstreamRbsp.cpp
+    EndOfSeqRbsp.cpp
+    FillerDataRbsp.cpp
+    HrdParameters.cpp
+    MvdCoding.cpp
+    NalUnit.cpp
+    NalUnitHeader.cpp
+    Parser.cpp
+    PcmSample.cpp
+    PictureParameterSet.cpp
+    PpsMultilayerExtension.cpp
+    PpsRangeExtension.cpp
+    PredictionUnit.cpp
+    PredWeightTable.cpp
+    ProfileTierLevel.cpp
+    Rbsp.cpp
+    RbspSliceSegmentTrailingBits.cpp
+    RbspTrailingBits.cpp
+    RefPicListModification.cpp
+    ResidualCoding.cpp
+    SAO.cpp
+    ScalingListData.cpp
+    SeiMessage.cpp
+    SeiRbsp.cpp
+    SequenceParameterSet.cpp
+    ShortTermRefPicSet.cpp
+    SliceSegmentHeader.cpp
+    SliceSegmentData.cpp
+    SliceSegmentLayerRbsp.cpp
+    SubLayerHrdParameters.cpp
+    SpsMultilayerExtension.cpp
+    SpsRangeExtension.cpp
+    StreamNalUnit.cpp
+    Syntax.cpp
+    TransformTree.cpp
+    TransformUnit.cpp
+    VideoParameterSet.cpp
+    VuiParameters.cpp)
+
+ADD_LIBRARY(syntax STATIC ${syntax_SRC})
+TARGET_LINK_LIBRARIES(syntax utils structure decoder)

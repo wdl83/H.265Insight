@@ -9,3 +9,6 @@ bitstream:
 http://wftp3.itu.int/av-arch/jctvc-site/bitstream_exchange/draft_conformance/VPSID_A_VIDYO_2.zip
 command line arguments:
 ./bin/i265 -i VPSID_A_VIDYO_2.bit -n 3 -l all -o 2
+
+co-author:
+Michal Bartkowiak https://github.com/miszak

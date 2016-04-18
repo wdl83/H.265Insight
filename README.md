@@ -3,6 +3,8 @@ ITU-T H.265 v2 (10/2014) decoding process analyzer.
 
 **i265** implements decoding process as defined by **ITU-T H.265** (http://www.itu.int/rec/T-REC-H.265-201504-I/en).
 
+[![Build Status](https://api.travis-ci.org/vlad83/H.265Insight.svg?branch=master)](https://travis-ci.org/vlad83/H.265Insight)
+
 ## Requirements
 
 - C++11 conformant compiler. Complete project was built with GCC 5.3.1 and CLANG 3.6.2 before release;

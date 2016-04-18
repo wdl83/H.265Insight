@@ -1,0 +1,3 @@
+language: cpp
+script:
+  - rm -rf rel_obj_gcc && cd obj && cmake -DCMAKE_BUILD_TYPE=RELEASE ..

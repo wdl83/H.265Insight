@@ -1,3 +1,19 @@
 language: cpp
+sudo: false
+cache: apt
+
+matrix:
+  include:
+    - env: COMPILER=g++-5
+      compiler: g++-5
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages: g++-5
+
+before_install:
+  - export CXX=$COMPILER
+  - which $CXX
+
 script:
-  - rm -rf rel_obj_gcc && cd obj && cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+  - rm -rf rel_obj_gcc && cd rel_obj_gcc && cmake -DCMAKE_BUILD_TYPE=RELEASE ..

@@ -19,10 +19,6 @@ cd obj
 cmake -DCMAKE_BUILD_TYPE=RELEASE ../H.265Insight
 make
 ```
-to use CLANG
-```
-cmake -DUSE_CLANG=ON -DCMAKE_BUILD_TYPE=RELEASE ../H.265Insight
-```
 
 **i265** binary is located in obj/bin directory. For complete list of build time options see Flags.cmake
 

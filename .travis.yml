@@ -4,16 +4,15 @@ cache: apt
 
 matrix:
   include:
-    - env: COMPILER=g++-5
-      compiler: g++-5
+      compiler: gcc
       addons:
         apt:
-          sources: ubuntu-toolchain-r-test
-          packages: g++-5
-
-before_install:
-  - export CXX=$COMPILER
-  - which $CXX
+          sources:
+              - ubuntu-toolchain-r-test
+          packages:
+              - gcc-5
+              - g++-5
+    - env: COMPILER=g++-5
 
 script:
-  - rm -rf rel_obj_gcc && mkdir rel_obj_gcc && cd rel_obj_gcc && cmake -DCMAKE_BUILD_TYPE=RELEASE .. && make
+  - rm -rf rel_obj_gcc && mkdir rel_obj_gcc && cd rel_obj_gcc && cmake -DCMAKE_CXX_COMPILER=$COMPILER -DCMAKE_BUILD_TYPE=RELEASE .. && make

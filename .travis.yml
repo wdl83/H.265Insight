@@ -16,4 +16,4 @@ before_install:
   - which $CXX
 
 script:
-  - rm -rf rel_obj_gcc && cd rel_obj_gcc && cmake -DCMAKE_BUILD_TYPE=RELEASE ..
+  - rm -rf rel_obj_gcc && mkdir rel_obj_gcc && cd rel_obj_gcc && cmake -DCMAKE_BUILD_TYPE=RELEASE ..

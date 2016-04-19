@@ -4,12 +4,50 @@ language: cpp
 
 matrix:
   include:
-    - env: COMPILER=g++-5
+    - env: COMPILER=g++-5 BUILD_TYPE=RELEASE
       compiler: g++-5
       addons:
         apt:
           sources: ubuntu-toolchain-r-test
-          packages: g++-5
+          packages:
+            - g++-5
+            - unzip
+            - wget
+    - env: COMPILER=g++-5 BUILD_TYPE=DEBUG
+      compiler: g++-5
+      addons:
+        apt:
+          sources: ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+            - unzip
+            - wget
+    - env: COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
+      compiler: clang++-3.8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+            - llvm-toolchain-precise
+          packages:
+            - clang-3.8
+            - g++-5 
+            - unzip
+            - wget
+    - env: COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
+      compiler: clang++-3.8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+            - llvm-toolchain-precise
+          packages:
+            - clang-3.8
+            - g++-5 
+            - unzip
+            - wget
 
 before_install:
   - export CXX=$COMPILER
@@ -19,5 +57,8 @@ script:
   - rm -rf build;
   - mkdir -p build
   - cd ./build
-  - cmake -DCMAKE_BUILD_TYPE=RELEASE ../
+  - cmake -DABORT_ON_SEI_HASH_MISMATCH:bool=true -DCMAKE_BUILD_TYPE=$BUILD_TYPE ../
   - make
+  - wget http://wftp3.itu.int/av-arch/jctvc-site/bitstream_exchange/draft_conformance/VPSID_A_VIDYO_2.zip
+  - unzip VPSID_A_VIDYO_2.zip
+  - ./bin/i265 -i VPSID_A_VIDYO_2/VPSID_A_VIDYO_2.bit

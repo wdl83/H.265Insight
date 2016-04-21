@@ -5,26 +5,19 @@ language: cpp
 matrix:
   include:
     - env: COMPILER=g++-5 BUILD_TYPE=RELEASE
-      compiler: g++-5
-      addons:
+      addons: &gcc5
         apt:
           sources: ubuntu-toolchain-r-test
           packages:
             - g++-5
             - unzip
-            - wget
+            - python-virtualenv
+
     - env: COMPILER=g++-5 BUILD_TYPE=DEBUG
-      compiler: g++-5
-      addons:
-        apt:
-          sources: ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-            - unzip
-            - wget
+      addons: *gcc5
+
     - env: COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
-      compiler: clang++-3.8
-      addons:
+      addons: &clang38
         apt:
           sources:
             - ubuntu-toolchain-r-test
@@ -34,20 +27,10 @@ matrix:
             - clang-3.8
             - g++-5 
             - unzip
-            - wget
+            - python-virtualenv
+
     - env: COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
-      compiler: clang++-3.8
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-            - llvm-toolchain-precise
-          packages:
-            - clang-3.8
-            - g++-5 
-            - unzip
-            - wget
+      addons: *clang38
 
 before_install:
   - export CXX=$COMPILER
@@ -59,6 +42,14 @@ script:
   - cd ./build
   - cmake -DABORT_ON_SEI_HASH_MISMATCH:bool=true -DCMAKE_BUILD_TYPE=$BUILD_TYPE ../
   - make
-  - wget http://wftp3.itu.int/av-arch/jctvc-site/bitstream_exchange/draft_conformance/VPSID_A_VIDYO_2.zip
-  - unzip VPSID_A_VIDYO_2.zip
-  - ./bin/i265 -i VPSID_A_VIDYO_2/VPSID_A_VIDYO_2.bit
+  - |
+    if [[ "${BUILD_TYPE}" == "RELEASE" ]]; then
+      export PATH=$PWD/bin:$PATH
+      virtualenv tests
+      source ./tests/bin/activate
+      pip install pytest
+      pip install requests
+      pip install bs4
+      py.test ../test/bitstreams.py -v --capture=sys
+      deactivate
+    fi

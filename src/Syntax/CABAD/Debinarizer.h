@@ -71,7 +71,7 @@ public:
             ContextModel &...contextModel)
     {
         auto &arithmeticDecoder = state.arithmeticDecoder;
-        const auto lengthInBits = std::ceil(std::log2(cMax + 1));
+        const auto lengthInBits = std::ceil(std::log2(float(cMax + 1)));
         BinString binarization;
 
         for(int binIdx = 0; binIdx < lengthInBits; ++binIdx)

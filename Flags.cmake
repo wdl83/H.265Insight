@@ -8,7 +8,7 @@ IF(USE_CLANG)
     SET(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
     SET(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     # additional flags
-    SET(CMAKE_EXE_LINKER_FLAGS "-lstdc++ -lpthread")
+    SET(CMAKE_EXE_LINKER_FLAGS "-lstdc++ -lpthread -lm")
 ELSE(USE_CLANG)
     # C++ compiler flags
     SET(CMAKE_CXX_FLAGS "-std=c++11 -pipe -fstack-protector-all -Wall -Wextra -Wno-parentheses -pedantic -Wno-unused-local-typedefs -fdiagnostics-color=always -fno-exceptions" )
@@ -19,7 +19,7 @@ ELSE(USE_CLANG)
     SET(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
     SET(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     # additional flags
-    SET(CMAKE_EXE_LINKER_FLAGS "-lstdc++ -lpthread")
+    SET(CMAKE_EXE_LINKER_FLAGS "-lstdc++ -lpthread -lm")
 ENDIF(USE_CLANG)
 
 OPTION(ENABLE_ASAN "Enable Address Sanitizer" OFF)

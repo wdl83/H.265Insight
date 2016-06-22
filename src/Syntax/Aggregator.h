@@ -15,7 +15,7 @@ struct Payload
 {
     static const auto size = sizeof(T);
 
-    uint8_t bytes[size];
+    alignas(T) uint8_t bytes[size];
 
     const void *addr() const
     {

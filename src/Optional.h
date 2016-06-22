@@ -23,7 +23,7 @@ public:
 private:
     struct Storage
     {
-        unsigned char m_bytes[sizeof(Type)];
+        alignas(Type) unsigned char m_bytes[sizeof(Type)];
     };
 
     Storage m_storage;

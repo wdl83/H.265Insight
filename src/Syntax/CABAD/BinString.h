@@ -30,6 +30,10 @@ public:
         Payload(): value(0)
         {}
     };
+
+    static_assert(
+            sizeof(Payload) == sizeof(Underlying),
+            "alignment different then expected.");
 private:
     Payload m_payload;
 public:

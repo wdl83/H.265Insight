@@ -1,55 +1,18 @@
-sudo: false
-cache: apt
-language: cpp
+language: c++
+sudo: required
+services:
+  - docker
 
-matrix:
-  include:
-    - env: COMPILER=g++-5 BUILD_TYPE=RELEASE
-      addons: &gcc5
-        apt:
-          sources: ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-            - unzip
-            - python-virtualenv
-
-    - env: COMPILER=g++-5 BUILD_TYPE=DEBUG
-      addons: *gcc5
-
-    - env: COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
-      addons: &clang38
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.8
-            - llvm-toolchain-precise
-          packages:
-            - clang-3.8
-            - g++-5 
-            - unzip
-            - python-virtualenv
-
-    - env: COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
-      addons: *clang38
+env:
+  - COMPILER=g++-4.9 BUILD_TYPE=DEBUG
+  - COMPILER=g++-5 BUILD_TYPE=DEBUG
+  - COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
+  - COMPILER=g++-4.9 BUILD_TYPE=RELEASE
+  - COMPILER=g++-5 BUILD_TYPE=RELEASE
+  - COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
 
 before_install:
-  - export CXX=$COMPILER
-  - which $CXX
+  - docker build -t testing -f ci/testing.docker .
 
 script:
-  - rm -rf build;
-  - mkdir -p build
-  - cd ./build
-  - cmake -DABORT_ON_SEI_HASH_MISMATCH:bool=true -DCMAKE_BUILD_TYPE=$BUILD_TYPE ../
-  - make
-  - |
-    if [[ "${BUILD_TYPE}" == "RELEASE" ]]; then
-      export PATH=$PWD/bin:$PATH
-      virtualenv tests
-      source ./tests/bin/activate
-      pip install pytest
-      pip install requests
-      pip install bs4
-      py.test ../test/bitstreams.py -v --capture=sys
-      deactivate
-    fi
+  - docker run --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 testing /bin/bash -c "bash ./ci/run.sh"

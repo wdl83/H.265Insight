@@ -1,0 +1,13 @@
+FROM debian:testing
+
+RUN apt-get update
+RUN apt-get install -y g++-4.9
+RUN apt-get install -y g++-5
+RUN apt-get install -y g++-6
+RUN apt-get install -y clang-3.8
+RUN apt-get install -y unzip
+RUN apt-get install -y make
+RUN apt-get install -y cmake
+RUN apt-get install -y python
+RUN apt-get install -y virtualenv
+RUN apt-get install -y wget

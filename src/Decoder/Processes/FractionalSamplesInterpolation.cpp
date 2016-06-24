@@ -105,7 +105,8 @@ void interpolate(
             y < height + Blk::bottomOffset && isHorizontal;
             ++y)
     {
-        for(auto x = 0_pel, xPos = -Blk::leftOffset; x < width; ++x, ++xPos)
+        auto xPos = -Blk::leftOffset;
+        for(auto x = 0_pel; x < width; ++x, ++xPos)
         {
             InputType in;
 
@@ -120,8 +121,9 @@ void interpolate(
     }
 
     // vertical interpolation (d, h, n, e, i, p, f, j, q, g, k, r)
+    auto yPos = -Blk::topOffset;
     for(
-            auto y = 0_pel, yPos = - Blk::topOffset;
+            auto y = 0_pel;
             y < height && isVertical;
             ++y, ++yPos)
     {

@@ -374,6 +374,8 @@ LastSignificantCoeffX::LastSignificantCoeffX(const ResidualCoding &rc)
             set(*lastSigCoeffXPrefix);
         }
     }
+
+    log(LogId::Syntax, align(getName(Id)), " ?", '\t', inUnits(), '\n');
 }
 /*----------------------------------------------------------------------------*/
 LastSignificantCoeffY::LastSignificantCoeffY(const ResidualCoding &rc)
@@ -408,6 +410,8 @@ LastSignificantCoeffY::LastSignificantCoeffY(const ResidualCoding &rc)
             set(*lastSigCoeffYPrefix);
         }
     }
+
+    log(LogId::Syntax, align(getName(Id)), " ?", '\t', inUnits(), '\n');
 }
 /*----------------------------------------------------------------------------*/
 } /* ResidualCodingContent */
@@ -442,7 +446,7 @@ void ResidualCoding::onParse(
         spsre && bool(*spsre->get<SPSRE::ExtendedPrecisionProcessingFlag>());
     const auto persistentRiceAdaptationEnabledFlag =
         spsre && bool(*spsre->get<SPSRE::PersistentRiceAdaptationEnabledFlag>());
-    const auto cabacBypassAlignmentEnbaledFlag =
+    const auto cabacBypassAlignmentEnabledFlag =
         spsre && bool(*spsre->get<SPSRE::CabacBypassAlignmentEnabledFlag>());
 
     const auto transformSkipEnabledFlag = pps->get<PPS::TransformSkipEnabledFlag>();
@@ -537,10 +541,10 @@ void ResidualCoding::onParse(
     auto coeffSignFlag = embed<CoeffSignFlag>(*this);
     auto coeffAbsLevelRemaining = embed<CoeffAbsLevelRemaining>(*this);
     auto &residuals = picture->pelBuffer(PelLayerId::Residual, plane);
-    auto escapeDataPresent = false;
 
     for(int i = lastSubBlock; i >= 0; --i)
     {
+        auto escapeDataPresent = false;
         const auto subBlkCoord = toCoord(*scanIdx, SubCb(i), toSubCb(toPel(rcSize)));
 
         auto inferSbDcSigCoeffFlag = false;
@@ -678,7 +682,7 @@ void ResidualCoding::onParse(
                         || !signHidden
                         || (firstSigScanPos != n)))
             {
-                if(cabacBypassAlignmentEnbaledFlag && escapeDataPresent)
+                if(cabacBypassAlignmentEnabledFlag && escapeDataPresent)
                 {
                     cabadState(decoder).arithmeticDecoder.align();
                 }
@@ -707,7 +711,7 @@ void ResidualCoding::onParse(
 
                 if(baseLevel == (8 > numSigCoeff ? X : 1))
                 {
-                    if(cabacBypassAlignmentEnbaledFlag && escapeDataPresent)
+                    if(cabacBypassAlignmentEnabledFlag && escapeDataPresent)
                     {
                         cabadState(decoder).arithmeticDecoder.align();
                     }

@@ -95,6 +95,7 @@ void callIf_onParse(
         CABAD::TagCABAD &,
         A_n &&... a_n)
 {
+    log(LogId::ArithmeticDecoderState, getName(S::Id), '\n');
     getFrom(streamAccessLayer, decoder, cabadState(decoder), s, std::forward<A_n>(a_n)...);
 }
 

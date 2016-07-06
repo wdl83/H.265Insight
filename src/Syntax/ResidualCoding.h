@@ -333,7 +333,7 @@ class LastSignificantCoeffX:
 public:
     static const auto Id = ElementId::LastSignificantCoeffX;
 
-    LastSignificantCoeffX(const ResidualCoding &rc);
+    LastSignificantCoeffX(const ResidualCoding &);
 };
 /*----------------------------------------------------------------------------*/
 class LastSignificantCoeffY:

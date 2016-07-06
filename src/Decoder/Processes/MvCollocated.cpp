@@ -118,7 +118,9 @@ Tuple<MotionVector, bool> MvCollocated::exec(
 
             /* WARNING:
              * 04/2013, 8.5.3.2.8 "Derivation process for collocated motion vectors"
-             * says currPb (puCoord) but it is a BUG it should be colPb (cpuCoord) */
+             * says currPb (puCoord) but it is a BUG it should be colPb (cpuCoord)
+             *
+             * This is corrected in HEVCv2 (10/2014) 8.5.3.2.9 */
             const auto &crpl = cpicture->slice(cpuCoord)->rpl;
             // (8-177), (8-178)
             const auto cPocDiff =

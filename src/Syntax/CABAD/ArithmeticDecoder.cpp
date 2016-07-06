@@ -136,6 +136,7 @@ void ArithmeticDecoder::init(StreamAccessLayer &streamAccessLayer)
 /*----------------------------------------------------------------------------*/
 void ArithmeticDecoder::align()
 {
+    log(LogId::ArithmeticDecoderState, "ArithmeticDecoder::align()\n");
     m_codIRange = 256;
 }
 /*----------------------------------------------------------------------------*/

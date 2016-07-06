@@ -1,6 +1,6 @@
 IF(USE_CLANG)
     # C++ compiler flags
-    SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wshadow -Wno-parentheses -pedantic -Qunused-arguments -fno-exceptions -Wno-unused-local-typedef" )
+    SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-parentheses -pedantic -fno-exceptions -Wno-unused-local-typedefs")
     SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DPTR_CHECK -DBDRY_CHECK -DNUMERIC_CHECK" )
     SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -mtune=native -DNO_DEBUG -DNDEBUG -fPIC -rdynamic -Wno-unused-parameter" )
     # C compiler flags

@@ -5,11 +5,9 @@ HEVC v2 / ITU-T H.265 v2 (10/2014) decoding process analyzer.
 
 [![Build Status](https://api.travis-ci.org/vlad83/H.265Insight.svg?branch=master)](https://travis-ci.org/vlad83/H.265Insight)
 
-## Deviation from ITU-T H.265 v2 (10/2014) and v3 (04/2015) specifications
+### Deviation from ITU-T H.265 v2 (10/2014) and v3 (04/2015) specifications
 
-* It is specified that **escapeDataPresent** flag should be reset every block but
-...technical intent was to reset it every subblock (https://hevc.hhi.fraunhofer.de/trac/hevc/ticket/1391).
-...This is considered as BUG in text and implementation resets it every subblock.
+* It is specified that **escapeDataPresent** flag should be reset every block but technical intent was to reset it every subblock (https://hevc.hhi.fraunhofer.de/trac/hevc/ticket/1391). This is considered as BUG in text and implementation resets it every subblock.
 
 ## Requirements
 

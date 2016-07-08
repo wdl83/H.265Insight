@@ -14,6 +14,8 @@ def get_streams(path):
 
 def make_test(fname):
     def proto(*args, **kwds):
+        cmd = subprocess.Popen('echo', env=dict(os.environ))
+        cmd.communicate()
         test_cmd = 'i265 -i %s'%fname
         cmd = subprocess.Popen(test_cmd.split(), env=dict(os.environ))
         cmd.communicate()

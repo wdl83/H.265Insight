@@ -20,7 +20,7 @@
 
 namespace HEVC {
 /*----------------------------------------------------------------------------*/
-typedef int16_t Sample;
+typedef int32_t Sample;
 
 /* 04/2013
  * 3, "Definitions"

@@ -55,29 +55,50 @@ void CodedSubBlockFlag::onParse(
 /*----------------------------------------------------------------------------*/
 void SigCoeffFlag::onParse(
         StreamAccessLayer &streamAccessLayer, Decoder::State &decoder,
+        const CodingUnitContent::CuTransquantBypassFlag &cuTransquantBypassFlag,
+        const TransformSkipFlag &transformSkipFlag,
         const CodedSubBlockFlag &codedSubBlockFlag,
         Plane plane, ScanIdx scanIdx, Log2 trafoSize, PelCoord at)
 {
     const auto contextModel =
-        [this, &codedSubBlockFlag, plane, scanIdx, trafoSize, at](
+        [
+            this,
+            &decoder,
+            &cuTransquantBypassFlag,
+            &transformSkipFlag,
+            &codedSubBlockFlag,
+            plane, scanIdx, trafoSize, at](
                 CABAD::State &state, int binIdx) -> CABAD::Variable &
     {
-        /* 04/2013, 9.3.4.2.5
+        /* 04/2013 && 04/2015, 9.3.4.2.5
          * "Derivation process of ctxInc for the syntax element sig_coeff_flag" */
         syntaxCheck(0 == binIdx);
 
-        /* Table 9-39 */
+        typedef SpsRangeExtension SPSRE;
+
+        const auto picture = decoder.picture();
+        const auto spsre = picture->spsre;
+        const auto transformSkipContextEnabledFlag =
+            spsre && bool(*spsre->get<SPSRE::TransformSkipContextEnabledFlag>());
+
+        /* 04/2013, 9.3.4.2.5 Table 9-39 */
+        /* 04/2015, 9.3.4.2.5 Table 9-45 */
         static const int ctxIdxMap[] = {0, 1, 4, 5, 2, 3, 4, 5, 6, 6, 8, 8, 7, 7, 8};
         auto sigCtx = 0;
 
-        if(2_log2 == trafoSize)
+        if(transformSkipContextEnabledFlag && (transformSkipFlag || cuTransquantBypassFlag))
         {
-            /* (9-23) */
+            /* 04/2015 (9-31) */
+            sigCtx = Plane::Y == plane ? 42 : 16;
+        }
+        else if(2_log2 == trafoSize)
+        {
+            /* 04/2013 (9-23), 04/2015 (9-32) */
             sigCtx = ctxIdxMap[toUnderlying(at.y() * 4 + at.x())];
         }
         else if(at.x() + at.y() == 0_pel)
         {
-            /* (9-24) */
+            /* 04/2013 (9-24), 04/2015 (9-33) */
             //sigCtx = 0;
         }
         else
@@ -89,21 +110,21 @@ void SigCoeffFlag::onParse(
 
             if(side - 1_sub_cb > subBlkCoord.x())
             {
-                /* (9-25) */
+                /* 04/2013 (9-25), 04/2015 (9-34) */
                 prevCsbf +=
                     codedSubBlockFlag[{subBlkCoord.x() + 1_sub_cb, subBlkCoord.y()}];
             }
 
             if(side - 1_sub_cb > subBlkCoord.y())
             {
-                /* (9-26) */
+                /* 04/2013 (9-26), 04/2015 (9-35) */
                 prevCsbf +=
                     codedSubBlockFlag[{subBlkCoord.x(), subBlkCoord.y() + 1_sub_cb}] * 2;
             }
 
             if(0 == prevCsbf)
             {
-                /* (9-27) */
+                /* 04/2013 (9-27), 04/2015 (9-36) */
                 sigCtx =
                     0_pel == blkOffset.x() + blkOffset.y()
                     ? 2
@@ -111,23 +132,17 @@ void SigCoeffFlag::onParse(
             }
             else if(1 == prevCsbf)
             {
-                /* (9-28) */
-                sigCtx =
-                    0_pel == blkOffset.y()
-                    ? 2
-                    : 1_pel == blkOffset.y();
+                /* 04/2013 (9-28), 04/2015 (9-37) */
+                sigCtx = 0_pel == blkOffset.y() ? 2 : 1_pel == blkOffset.y();
             }
             else if(2 == prevCsbf)
             {
-                /* (9-29) */
-                sigCtx =
-                    0_pel == blkOffset.x()
-                    ? 2
-                    : 1_pel == blkOffset.x();
+                /* 04/2013 (9-29), 04/2015 (9-38) */
+                sigCtx = 0_pel == blkOffset.x() ? 2 : 1_pel == blkOffset.x();
             }
             else if(3 == prevCsbf)
             {
-                /* (9-30) */
+                /* 04/2013 (9-30), 04/2015 (9-39) */
                 sigCtx = 2;
             }
             else
@@ -140,18 +155,18 @@ void SigCoeffFlag::onParse(
             {
                 if(0_sub_cb < subBlkCoord.x() + subBlkCoord.y())
                 {
-                    /* (9-31) */
+                    /* 04/2013 (9-31), 04/2015 (9-40) */
                     sigCtx += 3;
                 }
 
                 if(3_log2 == trafoSize)
                 {
-                    /* (9-32) */
+                    /* 04/2013 (9-32), 04/2015 (9-41) */
                     sigCtx += HEVC::ScanIdx::Diagonal == scanIdx ? 9 : 15;
                 }
                 else
                 {
-                    /* (9-33) */
+                    /* 04/2013 (9-33), 04/2015 (9-42) */
                     sigCtx += 21;
                 }
             }
@@ -159,17 +174,18 @@ void SigCoeffFlag::onParse(
             {
                 if(3_log2 == trafoSize)
                 {
-                    /* (9-34) */
+                    /* 04/2013 (9-34), 04/2015 (9-43) */
                     sigCtx += 9;
                 }
                 else
                 {
-                    /* (9-35) */
+                    /* 04/2013 (9-35), 04/2015 (9-44) */
                     sigCtx += 12;
                 }
             }
         }
 
+        /* 04/2013 (9-36) (9-37), 04/2015 (9-45) (9-46) */
         return
             state.getVariable(
                     CABAD::CtxId::sig_coeff_flag,
@@ -578,6 +594,8 @@ void ResidualCoding::onParse(
             {
                 parse(
                         streamAccessLayer, decoder, *sigCoeffFlag,
+                        *cuTransquantBypassFlag,
+                        *transformSkipFlag,
                         *codedSubBlockFlag, plane, *scanIdx, rcSize, coeffCoord);
 
                 if((*sigCoeffFlag)[coeffCoord])

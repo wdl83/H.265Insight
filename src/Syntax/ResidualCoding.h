@@ -426,6 +426,8 @@ public:
 
     void onParse(
             StreamAccessLayer &, Decoder::State &decoder,
+            const CodingUnitContent::CuTransquantBypassFlag &,
+            const TransformSkipFlag &,
             const CodedSubBlockFlag &, Plane, ScanIdx, Log2, PelCoord);
 };
 /*----------------------------------------------------------------------------*/

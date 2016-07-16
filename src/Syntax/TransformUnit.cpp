@@ -130,7 +130,7 @@ void TransformUnit::onParse(
                 parse(
                         streamAccessLayer, decoder,
                         *embedSubtreeInArray<CrossCompPredArray>(
-                            *this, int(Plane::Cb)), Chroma::Cb);
+                            *this, int(Chroma::Cb)), Chroma::Cb);
             }
 
             if(cbfCb)

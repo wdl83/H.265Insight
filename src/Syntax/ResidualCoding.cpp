@@ -770,20 +770,19 @@ void ResidualCoding::onParse(
     }
 
     const auto toStr =
-        [inPlaneCoord, rcSize, plane, &residuals](std::ostream &oss)
+        [inPlaneCoord, rcSize, plane, &residuals](std::ostream &os)
         {
-            oss << inPlaneCoord << ' ' << getName(plane) << '\n';
+            os << inPlaneCoord << ' ' << getName(plane) << '\n';
 
             for(auto y = 0_pel; y < toPel(rcSize); ++y)
             {
                 for(auto x = 0_pel; x < toPel(rcSize); ++x)
                 {
-                    oss
-                        << std::hex << std::setw(4) << std::setfill('0')
-                        << residuals[inPlaneCoord + PelCoord{x, y}] << ' ';
+                    pelFmt(os, residuals[inPlaneCoord + PelCoord{x, y}]);
+                    os << ' ';
                 }
 
-                oss << '\n';
+                os << '\n';
             }
         };
 

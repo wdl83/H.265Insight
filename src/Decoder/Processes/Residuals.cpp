@@ -24,26 +24,49 @@ void skipTransform(
         bool rotate)
 {
     const auto side = toPel(size);
+    const auto sideDiv2 = toPel(size - 1_log2);
 
     if(rotate)
     {
-        base += PelCoord{side - 1_pel, side - 1_pel};
-    }
-
-    for(auto y = 0_pel; y < side; ++y)
-    {
-        for(auto x = 0_pel; x < side; ++x)
+        for(auto y = 0_pel; y < side; ++y)
         {
-            const auto at = base + (rotate ? PelCoord{-x, -y} : PelCoord{x, y});
-            // 2 (shift)
-            const auto shifted = int32_t(r[at]) << tsShift;
-            // 3 (bdShift)
-            const auto unClipped = (shifted + bdOffset) >> bdShift;
+            for(auto x = 0_pel; x < side - y - (sideDiv2 > y ? 0_pel : 1_pel); ++x)
+            {
+                const auto atA = base + PelCoord{x, y};
+                const auto atB = base + PelCoord{side - 1_pel - x, side - 1_pel - y};
+                // 2 (shift)
+                const auto shiftedA = int32_t(r[atA]) << tsShift;
+                const auto shiftedB = int32_t(r[atB]) << tsShift;
+                // 3 (bdShift)
+                const auto unClippedA = (shiftedA + bdOffset) >> bdShift;
+                const auto unClippedB = (shiftedB + bdOffset) >> bdShift;
 
-            runtime_assert(!overflow(shifted, bdOffset));
-            /* WARNING: this clip3 is not part of 04/2013 specification,
-             * but is required by implementation */
-            r[at] = clip3(min, max, unClipped);
+                runtime_assert(!overflow(shiftedA, bdOffset));
+                runtime_assert(!overflow(shiftedB, bdOffset));
+                /* WARNING: this clip3 is not part of 04/2013 specification,
+                 * but is required by implementation */
+                r[atA] = clip3(min, max, unClippedB);
+                r[atB] = clip3(min, max, unClippedA);
+            }
+        }
+    }
+    else
+    {
+        for(auto y = 0_pel; y < side; ++y)
+        {
+            for(auto x = 0_pel; x < side; ++x)
+            {
+                const auto at = base + PelCoord{x, y};
+                // 2 (shift)
+                const auto shifted = int32_t(r[at]) << tsShift;
+                // 3 (bdShift)
+                const auto unClipped = (shifted + bdOffset) >> bdShift;
+
+                runtime_assert(!overflow(shifted, bdOffset));
+                /* WARNING: this clip3 is not part of 04/2013 specification,
+                 * but is required by implementation */
+                r[at] = clip3(min, max, unClipped);
+            }
         }
     }
 }
@@ -68,7 +91,7 @@ void bypassTransform(
             const auto dst = base + PelCoord{x, y};
             const PelCoord src{dst.x() - xOffset, dst.y() - yOffset};
 
-            r[dst] = r[src];
+            r[dst] += r[src];
         }
     }
 }
@@ -162,11 +185,11 @@ void Residuals::exec(
     else if(rotate)
     {
         const auto side = toPel(rcSize);
-        const auto sideDiv2Minus1 = toPel(rcSize - 1_log2) - 1_pel;
+        const auto sideDiv2 = toPel(rcSize - 1_log2);
 
-        for(auto y = 0_pel; y < sideDiv2Minus1; ++y)
+        for(auto y = 0_pel; y < side; ++y)
         {
-            for(auto x = 0_pel; x < sideDiv2Minus1; ++x)
+            for(auto x = 0_pel; x < side - y - (sideDiv2 > y ? 0_pel : 1_pel); ++x)
             {
                 const auto atA = coord + PelCoord{x, y};
                 const auto atB = coord + PelCoord{side - 1_pel - x, side - 1_pel - y};
@@ -189,21 +212,34 @@ void Residuals::exec(
     }
 
     const auto toStr =
-        [coord, rcSize, &r](std::ostream &oss)
+        [
+            coord, rcSize,
+            cuTransquantBypassFlag,
+            transformSkipFlag,
+            rotate,
+            intraRDPCM,
+            interRDPCM,
+            &r](std::ostream &os)
         {
             const auto side = toPel(rcSize);
 
-            oss << coord << '\n';
+            os << coord;
+            if(cuTransquantBypassFlag) os << ' ' << getName(CodingUnit::CuTransquantBypassFlag::Id);
+            if(transformSkipFlag) os << ' ' << getName(ResidualCoding::TransformSkipFlag::Id);
+            if(rotate) os << " rotate";
+            if(intraRDPCM) os << " intraRDPCM";
+            if(interRDPCM) os << " interRDPCM";
+            os << '\n';
 
             for(auto y = 0_pel; y < side; ++y)
             {
                 for(auto x = 0_pel; x < side; ++x)
                 {
-                    pelFmt(oss, r[coord + PelCoord{x, y}]);
-                    oss << ' ';
+                    pelFmt(os, r[coord + PelCoord{x, y}]);
+                    os << ' ';
                 }
 
-                oss << '\n';
+                os << '\n';
             }
         };
 

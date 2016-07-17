@@ -226,8 +226,8 @@ bool isTileBdry(
     }
     else
     {
-        const auto currTileId = picture->getTileId(coord);
-        const auto adjTileId = picture->getTileId(adjCoord);
+        const auto currTileId = picture->tileId(coord);
+        const auto adjTileId = picture->tileId(adjCoord);
 
         return currTileId != adjTileId;
     }

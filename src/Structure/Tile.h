@@ -20,8 +20,8 @@ private:
     SliceList m_slice;
 public:
     Tile(int id_, Range<Ctb> addrInTs):
-        m_id(id_),
-        m_addrInTs(addrInTs)
+        m_id{id_},
+        m_addrInTs{addrInTs}
     {}
 
     Tile(const Tile &) = delete;

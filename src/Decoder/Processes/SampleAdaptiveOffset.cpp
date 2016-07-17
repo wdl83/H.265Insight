@@ -493,7 +493,7 @@ void SampleAdaptiveOffset::exec(
     const auto inSameTile =
         [picture, ctuCoord](PelCoord adj)
         {
-            return picture->getTileId(ctuCoord) == picture->getTileId(adj);
+            return picture->tileId(ctuCoord) == picture->tileId(adj);
         };
 
     const auto inSameSlice =

@@ -138,7 +138,7 @@ void State::onStart(Syntax::CodingTreeUnit &ctu)
     const auto ssd = subtree<SSL>(*snu)->getSubtree<SSD>();
 
     picture()->add(Ptr<CTU>{ssd->getSubtreeList<CTU>().back()});
-    auto &tile = picture()->getTile(ctu.get<CTU::Coord>()->inUnits());
+    auto &tile = picture()->tile(ctu.get<CTU::Coord>()->inUnits());
 
     /* tile within a slice */
     if(tile.sliceList().empty())

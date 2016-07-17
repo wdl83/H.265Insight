@@ -61,7 +61,7 @@ int deriveQpYprev(
     const auto isFirstInTile =
         [picture, currMinQpGrp]()
         {
-            const auto &tile = picture->getTile(currMinQpGrp);
+            const auto &tile = picture->tile(currMinQpGrp);
             const auto addrInRs = picture->toAddrInRs(tile.bdryInTs().begin());
             return currMinQpGrp == picture->toPel(picture->toCoord(addrInRs));
         };

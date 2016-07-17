@@ -36,7 +36,7 @@ Picture::Picture(
     {
         for(int x = 0; x < getNumTileColumns(); ++x)
         {
-            m_tile.emplaceBack(id, getTileAddrBdryInTs(id));
+            m_tile.emplaceBack(id, tileAddrBdryInTs(id));
             ++id;
         }
     }
@@ -140,8 +140,8 @@ bool Picture::isAvailableInScanZ(PelCoord curr, PelCoord adj) const
             }
             else
             {
-                const auto currTileId = getTileId(curr);
-                const auto adjTileId = getTileId(adj);
+                const auto currTileId = tileId(curr);
+                const auto adjTileId = tileId(adj);
 
                 if(adjTileId != currTileId)
                 {

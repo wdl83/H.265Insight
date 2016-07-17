@@ -62,8 +62,8 @@ void getFrom(
         S &s,
         A_n &&... a_n)
 {
+    log(LogId::ArithmeticDecoderState, "# ", getName(S::Id), '\n');
     s.onGetFrom(streamAccessLayer, state, std::forward<A_n>(a_n)...);
-
     log(LogId::Syntax, " b", s.getBinString(), '\t', s.getValue());
 }
 
@@ -95,7 +95,6 @@ void callIf_onParse(
         CABAD::TagCABAD &,
         A_n &&... a_n)
 {
-    log(LogId::ArithmeticDecoderState, getName(S::Id), '\n');
     getFrom(streamAccessLayer, decoder, cabadState(decoder), s, std::forward<A_n>(a_n)...);
 }
 

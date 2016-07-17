@@ -363,24 +363,24 @@ public:
         return getNumTileRows() * getNumTileColumns();
     }
 
-    Range<Ctb> getTileRowBdry(int row) const
+    Range<Ctb> tileRowBdry(int row) const
     {
         return {m_rowBd[row], m_rowBd[row + 1]};
     }
 
-    Range<Ctb> getTileColumnBdry(int column) const
+    Range<Ctb> tileColumnBdry(int column) const
     {
         return {m_colBd[column], m_colBd[column + 1]};
     }
 
-    PelRect getTileBdry(int id) const
+    PelRect tileBdry(int id) const
     {
         runtime_assert(getNumTiles() > id);
 
         const auto row = id / getNumTileColumns();
         const auto column = id % getNumTileColumns();
-        const auto rowBdry = getTileRowBdry(row);
-        const auto columnBdry = getTileColumnBdry(column);
+        const auto rowBdry = tileRowBdry(row);
+        const auto columnBdry = tileColumnBdry(column);
         return
         {
             toPel(CtbCoord{columnBdry.begin(), rowBdry.begin()}),
@@ -389,9 +389,9 @@ public:
         };
     }
 
-    Range<Ctb> getTileAddrBdryInTs(int id) const
+    Range<Ctb> tileAddrBdryInTs(int id) const
     {
-        const auto bdry = getTileBdry(id);
+        const auto bdry = tileBdry(id);
         return
         {
             toAddrInTs(toAddrInRs(toCtb(bdry.topLeft()))),
@@ -399,7 +399,7 @@ public:
         };
     }
 
-    int getTileId(CtbCoord at) const
+    int tileId(CtbCoord at) const
     {
         const auto xDiff =
             std::upper_bound(std::begin(m_colBd), std::end(m_colBd), at.x())
@@ -411,9 +411,9 @@ public:
         return id;
     }
 
-    int getTileId(PelCoord at) const
+    int tileId(PelCoord at) const
     {
-        return getTileId(toCtb(at));
+        return tileId(toCtb(at));
     }
 
     Ctb toAddrInTs(Ctb addr) const

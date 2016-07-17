@@ -76,9 +76,9 @@ void SliceSegmentData::onParse(
                 && (
                         0_ctb == ctbAddrInTs
                         ||
-                        picture->getTileId(ctuCoord)
+                        picture->tileId(ctuCoord)
                         !=
-                        picture->getTileId(
+                        picture->tileId(
                             picture->toCoord(
                                 picture->toAddrInRs(ctbAddrInTs - 1_ctb))));
 
@@ -165,9 +165,9 @@ void SliceSegmentData::onParse(
                 && (
                         0_ctb == ctbAddrInTs
                         ||
-                        picture->getTileId(ctuCoord)
+                        picture->tileId(ctuCoord)
                         !=
-                        picture->getTileId(picture->toCoord(picture->toAddrInRs(ctbAddrInTs))));
+                        picture->tileId(picture->toCoord(picture->toAddrInRs(ctbAddrInTs))));
 
             /* WPP boundary (next CTU to be parsed is first CTU in a row) */
             const auto wppBoundary =

@@ -64,34 +64,34 @@ public:
     Picture &operator= (const Picture &) = delete;
     /*------------------------------------------------------------------------*/
     /* Tile */
-    const Tile &getTile(int id) const
+    const Tile &tile(int id) const
     {
         return m_tile[id];
     }
 
-    Tile &getTile(int id)
+    Tile &tile(int id)
     {
         return m_tile[id];
     }
 
-    const Tile &getTile(CtbCoord at) const
+    const Tile &tile(CtbCoord at) const
     {
-        return getTile(getTileId(at));
+        return tile(tileId(at));
     }
 
-    Tile &getTile(CtbCoord at)
+    Tile &tile(CtbCoord at)
     {
-        return getTile(getTileId(at));
+        return tile(tileId(at));
     }
 
-    const Tile &getTile(PelCoord at) const
+    const Tile &tile(PelCoord at) const
     {
-        return getTile(toCtb(at));
+        return tile(toCtb(at));
     }
 
-    Tile &getTile(PelCoord at)
+    Tile &tile(PelCoord at)
     {
-        return getTile(toCtb(at));
+        return tile(toCtb(at));
     }
     /*------------------------------------------------------------------------*/
     /* Slice */
@@ -102,7 +102,7 @@ public:
 
         const Ptr<Slice> slice{m_slice.back()};
 
-        getTile(toCoord(addr.inRs)).add(slice);
+        tile(toCoord(addr.inRs)).add(slice);
         return slice;
     }
 
@@ -110,7 +110,7 @@ public:
 
     Ptr<Slice> slice(CtbCoord at) const
     {
-        return getTile(at).slice(toAddrInTs(at));
+        return tile(at).slice(toAddrInTs(at));
     }
 
     Ptr<Slice> slice(PelCoord at) const

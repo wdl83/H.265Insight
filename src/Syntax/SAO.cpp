@@ -109,8 +109,8 @@ void SAO::onParse(StreamAccessLayer &streamAccessLayer, Decoder::State &decoder)
         const auto leftCtbInSliceSeg = ctbAddrInRs > sliceAddrInRs;
 
         const auto leftCtbInTile =
-            picture->getTileId(picture->toCoord(ctbAddrInRs))
-            == picture->getTileId(picture->toCoord(ctbAddrInRs - 1_ctb));
+            picture->tileId(picture->toCoord(ctbAddrInRs))
+            == picture->tileId(picture->toCoord(ctbAddrInRs - 1_ctb));
 
         if(leftCtbInSliceSeg && leftCtbInTile)
         {
@@ -125,8 +125,8 @@ void SAO::onParse(StreamAccessLayer &streamAccessLayer, Decoder::State &decoder)
         const auto upCtbInSliceSeg =
             (ctbAddrInRs - picWidthInCtbsY) >= sliceAddrInRs;
         const auto upCtbInTile =
-            picture->getTileId(picture->toCoord(ctbAddrInRs))
-            == picture->getTileId(picture->toCoord(ctbAddrInRs - picWidthInCtbsY));
+            picture->tileId(picture->toCoord(ctbAddrInRs))
+            == picture->tileId(picture->toCoord(ctbAddrInRs - picWidthInCtbsY));
 
         if(upCtbInSliceSeg && upCtbInTile)
         {

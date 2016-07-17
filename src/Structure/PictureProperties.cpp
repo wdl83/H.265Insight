@@ -273,11 +273,11 @@ std::string PictureProperties::toStr() const
     for(auto y = 0_pel; y < heightInLumaSamples; y += step)
     {
         auto tileColNo = 0;
-        const auto bTileRowBdry = toPel(getTileRowBdry(tileRowNo).end()) == y + step;
+        const auto bTileRowBdry = toPel(tileRowBdry(tileRowNo).end()) == y + step;
 
         for(auto x = 0_pel; x < widthInLumaSamples; x += step)
         {
-            const auto rTileColBdry = toPel(getTileColumnBdry(tileColNo).end()) == x + step;
+            const auto rTileColBdry = toPel(tileColumnBdry(tileColNo).end()) == x + step;
 
             if(
                     0_pel == x && 0_pel == y
@@ -296,10 +296,10 @@ std::string PictureProperties::toStr() const
                 oss << '-';
             }
             else if(
-                    getTileRowBdry(tileRowNo).end() == toCtb(y + step * 2)
-                    && getTileColumnBdry(tileColNo).end() == toCtb(x + step * 2))
+                    tileRowBdry(tileRowNo).end() == toCtb(y + step * 2)
+                    && tileColumnBdry(tileColNo).end() == toCtb(x + step * 2))
             {
-                const auto id = getTileId({x, y});
+                const auto id = tileId({x, y});
                 oss << char(9 > id ? id + '0' : id - 10 + 'A');
             }
             else if(0_pel == y % HEVC::toPel(ctbSizeY) && 0_pel == x % HEVC::toPel(ctbSizeY))
@@ -336,7 +336,7 @@ std::string PictureProperties::toStr() const
                 oss << '|';
             }
 
-            oss << std::setw(4) << toAddrInTs({x, y}) << '.' << getTileId({x, y}) << '|';
+            oss << std::setw(4) << toAddrInTs({x, y}) << '.' << tileId({x, y}) << '|';
         }
 
         oss << '\n';
@@ -353,7 +353,7 @@ std::string PictureProperties::toStr() const
                 oss << '|';
             }
 
-            oss << std::setw(6) << toAddrInScanZ({x, y}) << '.' << getTileId(toPel({x, y})) << '|';
+            oss << std::setw(6) << toAddrInScanZ({x, y}) << '.' << tileId(toPel({x, y})) << '|';
         }
 
         oss << '\n';

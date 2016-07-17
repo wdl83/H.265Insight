@@ -93,6 +93,8 @@ enum class LogId
     ResidualsY,
     ResidualsCb,
     ResidualsCr,
+    CrossComponentPredictionCb,
+    CrossComponentPredictionCr,
     ReconstructedY,
     ReconstructedCb,
     ReconstructedCr,

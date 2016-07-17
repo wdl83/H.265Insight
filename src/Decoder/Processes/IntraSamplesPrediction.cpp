@@ -19,12 +19,13 @@ namespace {
 /*----------------------------------------------------------------------------*/
 void logPredictedSamples(
         Plane plane,
-        PelCoord coord, PelCoord at, Pel side, const Structure::PelBuffer &src)
+        PelCoord coord, PelCoord at, Pel side, const Structure::PelBuffer &src,
+        IntraPredictionMode mode)
 {
     const auto toStr =
         [&](std::ostream &oss)
         {
-            oss << coord << '\n';
+            oss << coord << ' ' << getName(mode) << '\n';
 
             for(auto y = at.y(); y < at.y() + side; ++y)
             {
@@ -244,7 +245,7 @@ void IntraSamplesPrediction::exec(
                 adjSamples);
     }
 
-    logPredictedSamples(plane, coord, inPlaneCoord, toPel(inPlaneSize), dst);
+    logPredictedSamples(plane, coord, inPlaneCoord, toPel(inPlaneSize), dst, predModeIntra);
 }
 /*----------------------------------------------------------------------------*/
 }}} /* HEVC::Decoder::Processes */

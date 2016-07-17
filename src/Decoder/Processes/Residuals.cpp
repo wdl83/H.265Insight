@@ -78,8 +78,8 @@ void bypassTransform(
         PelCoord base, Log2 size,
         Direction dir)
 {
-    const auto isV = Direction::H == dir;
-    const auto isH = Direction::V == dir;
+    const auto isH = Direction::H == dir;
+    const auto isV = Direction::V == dir;
     const auto side = toPel(size);
     const auto xOffset = isH ? 1_pel : 0_pel;
     const auto yOffset = isV ? 1_pel : 0_pel;
@@ -145,8 +145,8 @@ void Residuals::exec(
         };
 
     const auto intraRDPCM =
-        isIntra
-        && implicitRdpcmEnabledFlag
+        implicitRdpcmEnabledFlag
+        && isIntra
         && (cuTransquantBypassFlag || transformSkipFlag)
         && (
                 IntraPredictionMode::Angular10 == intraPredictionMode()

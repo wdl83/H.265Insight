@@ -23,14 +23,14 @@ void CrossComponentPrediction::exec(
     const auto extendedPrecisionProcessingFlag =
         spsre && bool(*spsre->get<SPSRE::ExtendedPrecisionProcessingFlag>());
     const auto crossComponentPredictionEnabledFlag =
-        bool(ppsre && *ppsre->get<PPSRE::CrossComponentPredictionEnabledFlag>());
+        ppsre && bool(*ppsre->get<PPSRE::CrossComponentPredictionEnabledFlag>());
 
     if(crossComponentPredictionEnabledFlag)
     {
         const auto bitDepthY = picture->bitDepth(Component::Luma);
         const auto bitDepthC = picture->bitDepth(Component::Chroma);
         const auto min = minCoeff(extendedPrecisionProcessingFlag, bitDepthC);
-        const auto max = minCoeff(extendedPrecisionProcessingFlag, bitDepthC);
+        const auto max = maxCoeff(extendedPrecisionProcessingFlag, bitDepthC);
 
         const auto &src = picture->pelBuffer(PelLayerId::Residual, Plane::Y);
         auto &dst = picture->pelBuffer(PelLayerId::Residual, toPlane(chroma));
@@ -45,12 +45,34 @@ void CrossComponentPrediction::exec(
             for(auto x = 0_pel; x < side; ++x)
             {
                 const auto at = tuCoord + PelCoord{x, y};
-
                 const auto unClipped =
-                    (resScaleVal * ((int(src[at]) << bitDepthC) >> bitDepthY)) >> 3;
-                dst[at] = clip3(min, max, unClipped);
+                    (resScaleVal * ((int32_t(src[at]) << bitDepthC) >> bitDepthY)) >> 3;
+                dst[at] = clip3(min, max, int32_t(dst[at]) + unClipped);
             }
         }
+
+        const auto toStr =
+            [tuCoord, side, resScaleVal, &dst](std::ostream &os)
+            {
+                os << tuCoord << ' ' << resScaleVal << '\n';
+
+                for(auto y = 0_pel; y < side; ++y)
+                {
+                    for(auto x = 0_pel; x < side; ++x)
+                    {
+                        pelFmt(os, dst[tuCoord + PelCoord{x, y}]);
+                        os << (side - 1_pel == x ? '\n' : ' ');
+                    }
+                }
+            };
+
+        const LogId logId[] =
+        {
+            LogId::CrossComponentPredictionCb,
+            LogId::CrossComponentPredictionCr
+        };
+
+        log(logId[int(chroma)], toStr);
     }
 }
 /*----------------------------------------------------------------------------*/

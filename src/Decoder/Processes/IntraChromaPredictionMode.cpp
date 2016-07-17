@@ -18,6 +18,8 @@ CuIntraPredMode IntraChromaPredictionMode::exec(
     const auto is422 = ChromaFormatIdc::f422 == chromaFormatIdc;
     const auto is444 = ChromaFormatIdc::f444 == chromaFormatIdc;
 
+    runtime_assert(ChromaFormatIdc::fSCP != chromaFormatIdc);
+
     /* 10/2014, 8.4.3 "Derivation process for chroma intra prediction mode"
      * Table 8-3 */
     const std::array<int, EnumRange<IntraPredictionMode>::length()> to422 =

@@ -8,25 +8,19 @@ extensions = ('.bit', '.bin')
 thismodule = sys.modules[__name__]
 IGNORE = [
     'dfab7514dc5803739837a111b14e63013a42210a', # Bitdepth_B_RExt_Sony_1_bin
-    '790daa919581dc31c206b7dcefe7aeac93972656', # TSCTX_10bit_RExt_SHARP_1_bin
     '49a4fb424544847172b571aaa3f34cb2e54ad6cc', # GENERAL_12b_444_RExt_Sony_2_bit
     '82bae8f6d87e323a588cf25102cc60a4566e073a', # WAVETILES_RExt_Sony_2_bit
-    'f533ae8e66261347acae726dde49b0e098e273f4', # TSCTX_12bit_RExt_SHARP_1_bin
     'a6bc5efd7b495a1898b061a02296668b070ccbdb', # QMATRIX_A_RExt_Sony_1_bit
-    '8a824db8fc8e084f4af86ff737a0343c87560110', # TSCTX_12bit_I_RExt_SHARP_1_bin
     'e760329a488e25b1e36cc6c1688b18ab6f1d8dba', # ExplicitRdpcm_B_BBC_2_bit
-    '805795981f4be42aaf47c99b960a9e1feac35ea2', # TSCTX_10bit_I_RExt_SHARP_1_bin
     '97304210f204aeec5b055fdd592760a373c34b2c', # Bitdepth_A_RExt_Sony_1_bin
     '9da598bff5a39941a57d85bbda502a537abf56eb', # EXTPREC_HIGHTHROUGHPUT_444_16_INTRA_16BIT_RExt_Sony_1_bit
     '6fd86224fb34490c242e43bde035d6a349b4f0f8', # GENERAL_16b_444_RExt_Sony_2_bit
     '71213ef73a64a75651676691fe893d8f3d7b59ee', # GENERAL_16b_400_RExt_Sony_1_bit
     '4ab746eb9c911e56f97db922784020def4e50c1a', # EXTPREC_MAIN_444_16_INTRA_16BIT_RExt_Sony_1_bit
-    '6d0f3b4907853599c1369f4f042dc91f172f06d6', # TSCTX_8bit_I_RExt_SHARP_1_bin
     '947844980938d0d00ab4e658861b6d5217b68ff3', # GENERAL_16b_444_highThroughput_RExt_Sony_2_bit
     'ac9e6784aa7834cfa73734accdae7ae3ce05daa1', # ExplicitRdpcm_A_BBC_1_bit
     '0fc7d8b534412a51d9e515a58e12a3a1be688010', # PERSIST_RPARAM_A_RExt_Sony_3_bit
     '40699703214c1ef374c1e84ae973a9792606b76f', # GENERAL_10b_444_RExt_Sony_2_bit
-    'e43785f0054460bd80b51c51f913c42bc0347ced', # TSCTX_8bit_RExt_SHARP_1_bin
     'aa3cb828cc50e8156ef9c2446692be51d3cede33', # GENERAL_8b_444_RExt_Sony_2_bit
 ]
 

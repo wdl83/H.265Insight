@@ -14,7 +14,9 @@ struct ResScaleAbsPlus1:
     ResScaleAbsPlus1():
         /* 10/2014, 9.3.3 "Binarization process", Table 9-38 */
         CABAD::TruncatedRice{0, 4}
-    {}
+    {
+        setValue(0);
+    }
 
     Log2 inUnits() const
     {
@@ -84,8 +86,17 @@ struct CrossCompPred:
 
     int resScaleVal() const
     {
-        const auto absVal = toInt(get<ResScaleAbsPlus1>()->inUnits() - 1_log2);
-        return *get<ResScaleSignFlag>() ? -absVal : absVal;
+        const auto scaleAbsPlus1 = get<ResScaleAbsPlus1>()->inUnits();
+
+        if(0_log2 == scaleAbsPlus1)
+        {
+            return 0;
+        }
+        else
+        {
+            const auto absVal = toInt(scaleAbsPlus1 - 1_log2);
+            return *get<ResScaleSignFlag>() ? -absVal : absVal;
+        }
     }
 
     void onParse(StreamAccessLayer &, Decoder::State &, Chroma);

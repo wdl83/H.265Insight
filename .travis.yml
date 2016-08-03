@@ -4,17 +4,29 @@ services:
   - docker
 
 env:
-  - COMPILER=g++-4.9 BUILD_TYPE=DEBUG
-  - COMPILER=g++-5 BUILD_TYPE=DEBUG
-  - COMPILER=g++-6 BUILD_TYPE=DEBUG
-  - COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
-  - COMPILER=g++-4.9 BUILD_TYPE=RELEASE
-  - COMPILER=g++-5 BUILD_TYPE=RELEASE
+  global:
+  - secure: 4Yj4fUq8xs7xn63M5IreREW9uIbqj7NM1lLFAuZQ+16FGz2KtNjr2aifoKPWvf6dMi4bEJ6PuR00EmgUIzQ5vdycamsniH0sVC5KMZz75oOCXHv+LBpKvACRYWH7QLqeo/YIwiGBnvEb6oH0U0s2MWHOw6jH0PNNZ04VHrwZmVi19gA9vsj8fman3QhXuOZXIBBzlX2WcnJG0b6hKoAlDGKd5w/WpRnM8aQt6WfWLrn/AdvtBDWs8WXHVldMJ74uof70B/nm1DhH5kofefkxgrJ+L6bqJ2Ym2dtDUxuRaz8J8r0kJKIOt87N2YKamfUEltE+kXa9G8rzWOlT/E4mHCGBMEcT022HpvMLYBUCZ/T8Bx/SG6F3y/769jRhblhQccq8Jq5Ovg1MH8N2AmZqlgAD4/FI97Jx/fdMl+DWHirmV9NKLMhdFad0VcBgbk48MkWyEW6Y8CJv36r7EHKm9oqrk2WkXl871GcuUnWnezwEE9Q0Z9C+gLhydnpJlmW8I7baaWQYn0daMY8YxJOy1jWN3cxDd+tcEFSAnKkBRIc5fM4BxXJtrjxI6L0XQJeFt0mvBktkt8xYfrtdWQFIErYxEAKPvbAaM7ggxq3YX5klv4Sz+5u22Y6tZajzSkPf8Kgd1GVtiHRbaxd6NkUkNXg3epfmDbe7M6ajbvMD2aQ=
+  - secure: sz+ZKt2BpRJtANipZtssqgsyXa6xgCBWqMjktgmjOjezuTrQ5fmNZAQ29e2S7RvONQrEfQZecBISqmU6Nq8AKlHHSo3l9HxSVoFyGOLu+ui8X8TExcL+yrRKAwL2wt48lu0PVNEAdG1mDVWoyMrMUkiAeVa5f/sZD9CqcyeYo0MaesltriTfAv1QE/LzUvEgve9t5enGJEc2QHWl5l6rSQmXwswajL3Fj4yIPPigWK8BAlaajLNcGuFq0BIKbhloRqYlhDZO4fPYUnSQ95Uh8fEi21DiyigFTojk1B7F31v4dUWDWeEJ7XfHwwxHsgvK1m9aJ/np2cirBrOmmfmyPfVYI4KuSoHGsDMPyitqLGY/TZ0UxUUyB+F5OpNtEq5djxue/8NL6pTcb4ve8h3OTgaAGesL1BlY1ULa4sgeoIVB+D0VO/o2ENFY9MUSG8fsOQibGijhlWuxJz3bdsxghIG8H49t6GZ3hWZgrLXesx/N5rk1zCwYaVdcKhk/oIdntZErEW2BqN9KVai6miPmEbj+zI4DcH4m9YbNsU4D6/908Gdv5b3Wv/I02+K8Egekw6EH27ZEj4dJ82ppl6ybWUcj4u7kqcPWuW5d95zSyr2MMtfJUqM8XA6UhjuBSDXS95VScYcJHsMrR0Wf/57HhY0DftaQ8UTb2MzwpnzXWS4=
+  matrix:
+    #  - COMPILER=g++-4.9 BUILD_TYPE=DEBUG
+    #  - COMPILER=g++-5 BUILD_TYPE=DEBUG
+    #  - COMPILER=g++-6 BUILD_TYPE=DEBUG
+    #  - COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
+    #  - COMPILER=g++-4.9 BUILD_TYPE=RELEASE
+    #  - COMPILER=g++-5 BUILD_TYPE=RELEASE
   - COMPILER=g++-6 BUILD_TYPE=RELEASE
-  - COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
+    #  - COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
 
 before_install:
-  - docker build -t testing -f ci/testing.docker .
+  #  - docker build -t testing -f ci/testing.docker .
+  - mkdir -p ~/.ssh
+  - printf "Host github.com\n\tStrictHostKeyChecking=no\n\tIdentityFile ~/.ssh/travis.key\n" > ~/.ssh/config
+  - openssl aes-256-cbc -d -in ci/travis.enc -out ~/.ssh/travis.key -K $OPENSSL_KEY -iv $OPENSSL_IV > /dev/null 2>&1
+  - chmod 700 -R ~/.ssh
+  - git config --global user.name "travis-ci"
+  - git config --global user.email "bot-attugit.xcode@travis-ci.com"
+  - git remote add github git@github.com:vlad83/H.265Insight.git
+  - git fetch github
 
-script:
-  - docker run --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 testing /bin/bash -c "bash ./ci/run.sh"
+#script:
+#  - docker run --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 testing /bin/bash -c "bash ./ci/run.sh"

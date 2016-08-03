@@ -1,0 +1,19 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: HEVC H.265Insight
+#email: nil
+description: > # this means to ignore newlines until "baseurl:"
+  HEVC v2 / ITU-T H.265 v2 (10/2014) decoding process analyzer.
+  i265 implements decoding process as defined by ITU-T H.265.
+baseurl: '/H.265Insight' # the subpath of your site, e.g. /blog
+url: 'http://vlad83.github.io' # the base hostname & protocol for your site
+github_username:  vlad83
+
+# Build settings
+markdown: kramdown

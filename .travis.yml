@@ -1,20 +1,38 @@
 language: c++
 sudo: required
 services:
-  - docker
-
+- docker
 env:
-  - COMPILER=g++-4.9 BUILD_TYPE=DEBUG
-  - COMPILER=g++-5 BUILD_TYPE=DEBUG
-  - COMPILER=g++-6 BUILD_TYPE=DEBUG
-  - COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
-  - COMPILER=g++-4.9 BUILD_TYPE=RELEASE
-  - COMPILER=g++-5 BUILD_TYPE=RELEASE
-  - COMPILER=g++-6 BUILD_TYPE=RELEASE
-  - COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
-
+  matrix:
+    #  - COMPILER=g++-4.9 BUILD_TYPE=DEBUG
+    #  - COMPILER=g++-5 BUILD_TYPE=DEBUG
+    #  - COMPILER=g++-6 BUILD_TYPE=DEBUG
+    #  - COMPILER=clang++-3.8 BUILD_TYPE=DEBUG
+    #  - COMPILER=g++-4.9 BUILD_TYPE=RELEASE
+    #  - COMPILER=g++-5 BUILD_TYPE=RELEASE
+  - COMPILER=g++-6 BUILD_TYPE=RELEASE BUILD_GHPAGES=true
+    #  - COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
+  global:
+  - REPO_NAME=vlad83/H.265Insight
+  - secure: tU0XFesjTaPg0o64/+A8WyDaneJWCN3NdAlwkxQdeO5HnHE8S8HgpPY9qKuYTUiFZJ2wpxBhDGyUFxvOLZseMxDLPKs3UA+VlCBLqB0AfVx1kVSC58Cz3jPOIEH4Sael99KiMOySPDOLFaIikzAnXx84evk/66Rqr9TOZIa0aa8B/T8IlKSoA4l7trdES9ARBLUPptYyj6qNMBSmUSzXRx2EOSfUM26181zlA9MhEWI742ix9UIb4CPvsT6j1mPc886LK0aylyQ5cv/XzKar1gu5t95vfsDOk8N3flRewRCQqYj4XhY0rHtMpWYszm8Pmrp26ej5R9/uz7r6DUKYdgwz2Cq0KPcIQbEaCy/ARqkG/6JO89RHQCfMdZrt655ECnJ+bkKHZUmzD5PteJNa9NDHGYut6J9I2NCzV7q0Ec1V3oevDKLnxhH00WYcsCLzLtLnY46UdOfHDrW4TTRXb8VQjG1CeBKu+7UPE+tMO87uruGtxOaiNJRyN8H+RhUUk7nf1E3LBX8aG81q4+X9xAcF1QQY3VZeVkAJvDEZ7eCCN1hrGU71ZTIm5U8BH8NDjriXio1vmQ3/r8JuwoDIYUg/UDkQ+6EvkBotKjB15j68zpsVGyFbB68bFaNQSiIRPE+LSBCTiqVI+8j5NoX+dy5W26iVfXpncA5hoMRx1aE=
 before_install:
-  - docker build -t testing -f ci/testing.docker .
-
+- docker build -t testing -f ci/testing.docker .
 script:
-  - docker run --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 testing /bin/bash -c "bash ./ci/run.sh"
+- mkdir -p logs
+- docker run --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 --volume=$PWD/logs:/h265/logs testing
+  /bin/bash -c "bash ./ci/run.sh"
+- |
+  (if [[ "${TRAVIS_PULL_REQUEST}" == "false" && "${TRAVIS_REPO_SLUG}" == "${REPO_NAME}"&& "${TRAVIS_BRANCH}" == "feature/encrypt" && "${BUILD_GHPAGES}" == "true" ]]; then
+    if [ -z "$OPENSSL_PASSWD" ]; then echo "error: OPENSSL_PASSWD varible is missing!"; exit 1; fi
+    mkdir -p ~/.ssh
+    printf "Host github.com\n\tStrictHostKeyChecking=no\n\tIdentityFile ~/.ssh/travis.key\n" > ~/.ssh/config
+    openssl aes-256-cbc -d -in ci/travis.enc -out travis.key -pass env:OPENSSL_PASSWD > /dev/null 2>&1
+    sha1sum -c ./ci/travis.key.sha1 > /dev/null 2>&1 || { echo "error: sha1sum does not match!"; exit 1; }
+    mv travis.key ~/.ssh/travis.key
+    chmod 700 -R ~/.ssh
+    git config --global user.name "travis-ci"
+    git config --global user.email "h265-bot@travis-ci.com"
+    git remote add github git@github.com:${REPO_NAME}.git
+    git fetch github
+    cat ./logs/streams.sha1
+  fi) || exit 0

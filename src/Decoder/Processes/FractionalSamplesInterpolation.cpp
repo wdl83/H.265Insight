@@ -86,24 +86,20 @@ int mac(const std::array<int8_t, n> &coeff, const std::array<int, n> &x)
 typedef std::function<Sample (PelCoord)> RefSample;
 
 template <typename Blk>
-void interpolate(
+void interpolateH(
+        Plane plane,
         int bitDepth,
         SubPelCoord offset, Pel width, Pel height,
         const Blk &src, Blk &dst)
 {
     typedef typename FilterTraits<Blk>::InputType InputType;
 
-    const auto isHorizontal = 0_sub_pel < offset.x();
-    const auto isVertical = 0_sub_pel < offset.y();
+    if(0_sub_pel == offset.x()) return;
+
     const auto shift1 = std::min(4, bitDepth - 8);
-    const auto shift2 = 6;
-    const auto shift = 0_sub_pel == offset.x() ? shift1 : shift2;
 
     // horizontal interpolation (a, b, c)
-    for(
-            auto y = -Blk::topOffset;
-            y < height + Blk::bottomOffset && isHorizontal;
-            ++y)
+    for(auto y = -Blk::topOffset; y < height + Blk::bottomOffset; ++y)
     {
         auto xPos = -Blk::leftOffset;
         for(auto x = 0_pel; x < width; ++x, ++xPos)
@@ -120,12 +116,41 @@ void interpolate(
         }
     }
 
+    const LogId logName[] =
+    {
+        LogId::InterFractionalSamplesInterpolationY,
+        LogId::InterFractionalSamplesInterpolationCb,
+        LogId::InterFractionalSamplesInterpolationCr
+    };
+
+    log(
+        logName[int(plane)],
+        [&](std::ostream &oss)
+        {
+            oss << "H offset " << offset
+            << " width " << width << " height " << height << '\n';
+            dst.toStr(oss);
+        });
+}
+
+template <typename Blk>
+void interpolateV(
+        Plane plane,
+        int bitDepth,
+        SubPelCoord offset, Pel width, Pel height,
+        const Blk &src, Blk &dst)
+{
+    typedef typename FilterTraits<Blk>::InputType InputType;
+
+    if(0_sub_pel == offset.y()) return;
+
+    const auto shift1 = std::min(4, bitDepth - 8);
+    const auto shift2 = 6;
+    const auto shift = 0_sub_pel == offset.x() ? shift1 : shift2;
+
     // vertical interpolation (d, h, n, e, i, p, f, j, q, g, k, r)
     auto yPos = -Blk::topOffset;
-    for(
-            auto y = 0_pel;
-            y < height && isVertical;
-            ++y, ++yPos)
+    for(auto y = 0_pel; y < height; ++y, ++yPos)
     {
         for(auto x = 0_pel; x < width; ++x)
         {
@@ -140,6 +165,22 @@ void interpolate(
                 mac(FilterTraits<Blk>::coeffs[toUnderlying(offset.y()) - 1], in) >> shift;
         }
     }
+
+    const LogId logName[] =
+    {
+        LogId::InterFractionalSamplesInterpolationY,
+        LogId::InterFractionalSamplesInterpolationCb,
+        LogId::InterFractionalSamplesInterpolationCr
+    };
+
+    log(
+       logName[int(plane)],
+       [&](std::ostream &oss)
+       {
+           oss << "V offset " << offset
+           << " width " << width << " height " << height << '\n';
+           dst.toStr(oss);
+       });
 }
 /*----------------------------------------------------------------------------*/
 PredSampleLx deriveLuma(
@@ -190,13 +231,30 @@ PredSampleLx deriveLuma(
         }
     }
 
-    if(0_sub_pel < xFracL && 0_sub_pel < yFracL)
+    log(
+        LogId::InterFractionalSamplesInterpolationY,
+        [&](std::ostream &oss)
+        {
+            oss
+                << "coord " << coord << coord + PelCoord{h.begin(), v.begin()}
+                << " L" << int(l)
+                << " mv" << mv
+                << " ref["
+                << "POC " << ref->order.get<PicOrderCntVal>()
+                << " mv" << toPel(mv, 2_log2)
+                << " frac(" << xFracL << ", " << yFracL << ")]\n";
+            srcBlk->toStr(oss);
+        });
+
+    interpolateH(Plane::Y, bitDepth, {xFracL, yFracL}, width, height, *srcBlk, *dstBlk);
+
+    if(0_sub_pel < yFracL && 0_sub_pel < xFracL)
     {
-        interpolate(bitDepth, {xFracL, 0_sub_pel}, width, height, *srcBlk, *dstBlk);
-        std::swap(srcBlk, dstBlk);
+            std::swap(srcBlk, dstBlk);
+            dstBlk->clear();
     }
 
-    interpolate(bitDepth, {xFracL, yFracL}, width, height, *srcBlk, *dstBlk);
+    interpolateV(Plane::Y, bitDepth, {xFracL, yFracL}, width, height, *srcBlk, *dstBlk);
 
     for(auto y = 0_pel; y < height; ++y)
     {
@@ -207,19 +265,17 @@ PredSampleLx deriveLuma(
     }
 
     log(
-            LogId::InterFractionalSamplesInterpolationY,
-            coord, '\n',
-            [&](std::ostream &os){dstBlk->toStr(os);});
-
-    const auto toStr =
-        [l, width, height, mv, xFracL, yFracL, &dst, coord](std::ostream &oss)
+        LogId::InterPredictedSamplesY,
+        [&](std::ostream &oss)
         {
             oss
-                << coord
+                << "coord " << coord << ' ' << coord + PelCoord(h.begin(), v.begin())
                 << " L" << int(l)
                 << " mv" << mv
-                << " ref" << toPel(mv, 2_log2)
-                << " (" << xFracL << ", " << yFracL << ")\n";
+                << " ref["
+                << "POC " << ref->order.get<PicOrderCntVal>()
+                << " mv" << toPel(mv, 2_log2)
+                << " frac(" << xFracL << ", " << yFracL << ")]\n";
 
             for(auto y = 0_pel; y < height; ++y)
             {
@@ -229,9 +285,7 @@ PredSampleLx deriveLuma(
                     oss << (width - 1_pel == x ? '\n' : ' ');
                 }
             }
-        };
-
-    log(LogId::InterPredictedSamplesY, toStr);
+        });
 
     return dst;
 }
@@ -251,12 +305,13 @@ PredSampleLx deriveChroma(
 
     const auto bitDepth = picture->bitDepth(Component::Chroma);
     const auto chromaFormatIdc = picture->chromaFormatIdc;
-    const auto coord = pu.get<PU::Coord>()->inUnits();
+    const auto puCoord = pu.get<PU::Coord>()->inUnits();
+    const auto coord = scale(puCoord, Component::Chroma, chromaFormatIdc);
     const auto width = h.length();
     const auto height = v.length();
     const auto mv = (*pu.get<PU::MvCLX>())[l];
     const auto &src = ref->pelBuffer(PelLayerId::Decoded, toPlane(chroma));
-    const PelCoord refCoord = scale(coord, Component::Chroma, chromaFormatIdc) + toPel(mv, 3_log2);
+    const PelCoord refCoord = coord + toPel(mv, 3_log2);
     /* in 1/8 sample unit */
     const auto ratio = BlkChroma::ratio;
     const auto xFracL = fraction(mv.x(), ratio);
@@ -271,8 +326,8 @@ PredSampleLx deriveChroma(
     PredSampleLx dst(width, height);
 
     BlkChroma blk0, blk1;
-    auto *srcBlk = &blk0;
-    auto *dstBlk = &blk1;
+    auto srcBlk = &blk0;
+    auto dstBlk = &blk1;
 
     /* fill block with reference samples
      * (which are located at integer sample positions) */
@@ -286,13 +341,37 @@ PredSampleLx deriveChroma(
         }
     }
 
-    if(0_sub_pel < xFracL && 0_sub_pel < yFracL)
     {
-        interpolate(bitDepth, {xFracL, 0_sub_pel}, width, height, *srcBlk, *dstBlk);
-        std::swap(srcBlk, dstBlk);
+        const LogId logName[] =
+        {
+            LogId::InterFractionalSamplesInterpolationCb,
+            LogId::InterFractionalSamplesInterpolationCr
+        };
+
+        log(
+            logName[int(chroma)],
+            [&](std::ostream &oss)
+            {
+                oss << "coord " << coord << coord + PelCoord{h.begin(), v.begin()}
+                    << " L" << int(l)
+                    << " mv" << mv
+                    << " ref["
+                    << "POC " << ref->order.get<PicOrderCntVal>()
+                    << " mv" << toPel(mv, 3_log2)
+                    << " frac(" << xFracL << ", " << yFracL << ")]\n";
+                srcBlk->toStr(oss);
+            });
     }
 
-    interpolate(bitDepth, {xFracL, yFracL}, width, height, *srcBlk, *dstBlk);
+    interpolateH(toPlane(chroma), bitDepth, {xFracL, yFracL}, width, height, *srcBlk, *dstBlk);
+
+    if(0_sub_pel < yFracL && 0_sub_pel < xFracL)
+    {
+        std::swap(srcBlk, dstBlk);
+        dstBlk->clear();
+    }
+
+    interpolateV(toPlane(chroma), bitDepth, {xFracL, yFracL}, width, height, *srcBlk, *dstBlk);
 
     for(auto y = 0_pel; y < height; ++y)
     {
@@ -302,26 +381,17 @@ PredSampleLx deriveChroma(
         }
     }
 
-    {
-        const LogId logName[] =
-        {
-            LogId::InterFractionalSamplesInterpolationCb,
-            LogId::InterFractionalSamplesInterpolationCr
-        };
-
-        log(
-                logName[int(chroma)],
-                [coord, dstBlk](std::ostream &oss)
-                {
-                    oss << coord << '\n';
-                    dstBlk->toStr(oss);
-                });
-    }
-
     const auto toStr =
-        [l, width, height, &dst, coord](std::ostream &oss)
+        [&](std::ostream &oss)
         {
-            oss << coord << " L" << int(l) << '\n';
+            oss
+                << "coord " << coord << ' ' << coord + PelCoord(h.begin(), v.begin())
+                << " L" << int(l)
+                << " mv" << mv
+                << " ref["
+                << "POC " << ref->order.get<PicOrderCntVal>()
+                << " mv" << toPel(mv, 3_log2)
+                << " frac(" << xFracL << ", " << yFracL << ")]\n";
 
             for(auto y = 0_pel; y < height; ++y)
             {

@@ -3,6 +3,8 @@
 
 #include <Syntax/Syntax.h>
 #include <MD5Hasher.h>
+#include <CRCHasher.h>
+#include <ChecksumHasher.h>
 
 namespace HEVC { namespace Syntax { namespace SEI { namespace DecodedPictureHashContent {
 /*----------------------------------------------------------------------------*/
@@ -69,11 +71,11 @@ class PictureCRC:
     public Embedded,
     public VLD::FixedUInt<16, uint16_t>
 {
-    std::array<uint16_t, EnumRange<Plane>::length()> m_crc;
+    std::array<CRCHasher::ValueType, EnumRange<Plane>::length()> m_crc;
 public:
     static const auto Id = ElementId::sei_picture_crc;
 
-    uint16_t operator[] (Plane plane) const
+    CRCHasher::ValueType operator[] (Plane plane) const
     {
         return m_crc[int(plane)];
     }
@@ -90,7 +92,7 @@ public:
             }
 
             getFrom(streamAccessLayer, decoder, *this);
-            m_crc[int(plane)] = getValue();
+            m_crc[int(plane)].value(getValue());
         }
     }
 
@@ -99,7 +101,7 @@ public:
         for(auto plane : EnumRange<Plane>())
         {
             os << ' ' << getName(plane) << ' ';
-            os << std::hex << (*this)[plane];
+            os << std::hex << (*this)[plane].value();
         }
     }
 };
@@ -108,11 +110,11 @@ class PictureChecksum:
     public Embedded,
     public VLD::FixedUInt<32, uint32_t>
 {
-    std::array<uint32_t, EnumRange<Plane>::length()> m_checksum;
+    std::array<ChecksumHasher::ValueType, EnumRange<Plane>::length()> m_checksum;
 public:
     static const auto Id = ElementId::sei_picture_checksum;
 
-    uint32_t operator[] (Plane plane) const
+    ChecksumHasher::ValueType operator[] (Plane plane) const
     {
         return m_checksum[int(plane)];
     }
@@ -129,7 +131,7 @@ public:
             }
 
             getFrom(streamAccessLayer, decoder, *this);
-            m_checksum[int(plane)] = getValue();
+            m_checksum[int(plane)].value(getValue());
         }
     }
 
@@ -138,7 +140,7 @@ public:
         for(auto plane : EnumRange<Plane>())
         {
             os << ' ' << getName(plane) << ' ';
-            os << std::hex << (*this)[plane];
+            os << std::hex << (*this)[plane].value();
         }
     }
 };
@@ -160,6 +162,7 @@ struct DecodedPictureHash:
     static const auto Id = ElementId::sei_decoded_picture_hash;
 
     void onParse(StreamAccessLayer &, Decoder::State &);
+    std::string hash(Plane) const;
 };
 /*----------------------------------------------------------------------------*/
 }}} /* HEVC::Syntax::SEI */

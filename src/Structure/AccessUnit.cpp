@@ -248,20 +248,22 @@ void AccessUnit::onDPB()
 
                     runtime_assert(isMD5 || isCRC || isChecksum);
 
-                    std::cout << "[" << picture()->decodingNo << "]\tDPH ";
+                    std::cout << "[" << picture()->decodingNo << "]\tDPH\t";
 
                     if(isMD5)
                     {
-                        std::cout << "MD5:";
+                        std::cout << "MD5\n";
                     }
                     else if(isCRC)
                     {
-                        std::cout << "CRC:";
+                        std::cout << "CRC\n";
                     }
                     else if(isChecksum)
                     {
-                        std::cout << "Checksum:";
+                        std::cout << "Checksum\n";
                     }
+
+                    log(LogId::Picture, "POC: ", picture()->order.get<PicOrderCntVal>(), '\n');
 
                     for(auto plane : EnumRange<Plane>())
                     {
@@ -270,18 +272,45 @@ void AccessUnit::onDPB()
                             continue;
                         }
 
-                        std::cout << ' ' << getName(plane);
+                        std::cout << '\t' << getName(plane) << ' ';
 
-                        if(
-                                isMD5 && (*dph->get<DPH::PictureMD5>())[plane] != picture()->md5Hash(plane)
-                                || isCRC && (*dph->get<DPH::PictureCRC>())[plane] != picture()->crcHash(plane)
-                                || isChecksum && (*dph->get<DPH::PictureChecksum>())[plane] != picture()->checksumHash(plane))
-
+                        if(isMD5 && (*dph->get<DPH::PictureMD5>())[plane] != picture()->md5Hash(plane))
                         {
-                            std::cout << " mismatch";
+                            log(LogId::Picture, "MD5 ", getName(plane), picture()->md5Hash(plane).toStr(), '\n');
+                            std::cout
+                                << dph->hash(plane)
+                                << " expected " << picture()->md5Hash(plane).toStr() << '\n';
 #ifdef ABORT_ON_SEI_HASH_MISMATCH
                             runtime_assert(false);
 #endif
+                        }
+                        else if( isCRC && (*dph->get<DPH::PictureCRC>())[plane] != picture()->crcHash(plane))
+                        {
+                            log(LogId::Picture, "CRC ", getName(plane), picture()->crcHash(plane).toStr(), '\n');
+                            std::cout
+                                << dph->hash(plane)
+                                << " expected " << picture()->crcHash(plane).toStr() << '\n';
+#ifdef ABORT_ON_SEI_HASH_MISMATCH
+                            runtime_assert(false);
+#endif
+                        }
+                        else if(isChecksum && (*dph->get<DPH::PictureChecksum>())[plane] != picture()->checksumHash(plane))
+                        {
+                            log(LogId::Picture, "checksum ", getName(plane), picture()->checksumHash(plane).toStr(), '\n');
+                            std::cout
+                                << dph->hash(plane)
+                                << " expected " << picture()->checksumHash(plane).toStr() << '\n';
+#ifdef ABORT_ON_SEI_HASH_MISMATCH
+                            runtime_assert(false);
+#endif
+                        }
+                        else if(!isMD5 && !isCRC && !isChecksum)
+                        {
+                            std::cout << " undefined hash type\n";
+                        }
+                        else
+                        {
+                            std::cout << " OK\n";
                         }
                     }
 

@@ -59,7 +59,7 @@ MvMergeCandList MvZeroMergeCandiate::exec(
     const auto toStr =
         [puCoord, &candList](std::ostream &oss)
         {
-            oss << puCoord << '\n' << std::string(candList);
+            oss << puCoord << " [" << candList.toStr() << "]\n";
         };
 
     log(LogId::MvZeroMergeCandidate, toStr);

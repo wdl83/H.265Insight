@@ -49,7 +49,7 @@ public:
     {
         /* zero-ing is not required for correct decoding, this is done only
          * for analysis files to be consistent */
-        std::fill(std::begin(m_sample), std::end(m_sample), 0);
+        clear();
     }
 
     int operator[] (Pos at) const
@@ -62,12 +62,24 @@ public:
         return m_sample[calcOffset(at)];
     }
 
+    void clear()
+    {
+        std::fill(std::begin(m_sample), std::end(m_sample), 0);
+    }
+
     void toStr(std::ostream &os) const
     {
         for(auto y = 0; y < height; ++y)
         {
+            if(top == y || top + n == y)
+            {
+                for(auto i = 0; i < width + width * 8 + 3; ++i) os << '-';
+                os << '\n';
+            }
+
             for(auto x = 0; x < width; ++x)
             {
+                if(left == x || left + n == x) os << '|' << ' ';
                 os
                     << std::hex << std::setw(8) << std::setfill('0')
                     << m_sample[y * width + x]

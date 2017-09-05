@@ -33,22 +33,22 @@ struct PQ
         std::copy(std::begin(x), std::end(x), std::begin(pq));
     }
 
-    inline Sample p(int i) const
+    Sample p(int i) const
     {
         return pq[n / 2 - 1 - i];
     }
 
-    inline void p(int i, Sample x)
+    void p(int i, Sample x)
     {
         pq[n / 2 - 1 - i] = x;
     }
 
-    inline Sample q(int i) const
+    Sample q(int i) const
     {
         return pq[n / 2 + i];
     }
 
-    inline void q(int i, Sample x)
+    void q(int i, Sample x)
     {
         pq[n / 2 + i] = x;
     }

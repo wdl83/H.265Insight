@@ -10,20 +10,19 @@
 #include <Structure/PelBuffer.h>
 #include <Syntax/Fwd.h>
 #include <MD5Hasher.h>
+#include <CRCHasher.h>
+#include <ChecksumHasher.h>
 
 namespace HEVC { namespace Structure {
 /*----------------------------------------------------------------------------*/
 class DecodedPictureHash
 {
     std::array<MD5Hasher::ValueType, EnumRange<Plane>::length()> m_md5Hash;
-    std::array<uint16_t, EnumRange<Plane>::length()> m_crcHash;
-    std::array<uint32_t, EnumRange<Plane>::length()> m_checksumHash;
+    std::array<CRCHasher::ValueType, EnumRange<Plane>::length()> m_crcHash;
+    std::array<ChecksumHasher::ValueType, EnumRange<Plane>::length()> m_checksumHash;
 public:
     DecodedPictureHash()
-    {
-        std::fill(std::begin(m_crcHash), std::end(m_crcHash), 0);
-        std::fill(std::begin(m_checksumHash), std::end(m_checksumHash), 0);
-    }
+    {}
 
     MD5Hasher::ValueType md5Hash(Plane plane) const
     {
@@ -35,22 +34,22 @@ public:
         m_md5Hash[int(plane)] = value;
     }
 
-    uint16_t crcHash(Plane plane) const
+    CRCHasher::ValueType crcHash(Plane plane) const
     {
         return m_crcHash[int(plane)];
     }
 
-    void crcHash(Plane plane, uint16_t value)
+    void crcHash(Plane plane, CRCHasher::ValueType value)
     {
         m_crcHash[int(plane)] = value;
     }
 
-    uint32_t checksumHash(Plane plane) const
+    ChecksumHasher::ValueType checksumHash(Plane plane) const
     {
         return m_checksumHash[int(plane)];
     }
 
-    void checksumHash(Plane plane, uint32_t value)
+    void checksumHash(Plane plane, ChecksumHasher::ValueType value)
     {
         m_checksumHash[int(plane)] = value;
     }

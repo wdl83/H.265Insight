@@ -3,6 +3,28 @@
 
 namespace HEVC { namespace Syntax { namespace SEI {
 /*----------------------------------------------------------------------------*/
+std::string DecodedPictureHash::hash(Plane plane) const
+{
+    const auto isMD5 = HashType::MD5 == get<HashType>()->type();
+    const auto isCRC = HashType::CRC == get<HashType>()->type();
+    const auto isChecksum = HashType::Checksum == get<HashType>()->type();
+
+    if(isMD5)
+    {
+        return (*get<PictureMD5>())[plane].toStr();
+    }
+    else if(isCRC)
+    {
+        return (*get<PictureCRC>())[plane].toStr();
+    }
+    else if(isChecksum)
+    {
+        (*get<PictureChecksum>())[plane].toStr();
+    }
+
+    return {};
+}
+/*----------------------------------------------------------------------------*/
 void DecodedPictureHash::onParse(
         StreamAccessLayer &streamAccessLayer, Decoder::State &decoder)
 {

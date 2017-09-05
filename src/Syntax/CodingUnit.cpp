@@ -448,7 +448,7 @@ void CodingUnit::onParse(
     const auto cuCoord = get<Coord>()->inUnits();
     const auto size = get<Size>()->inUnits();
 
-    //log(LogId::Prediction, cuCoord, '\n');
+    log(LogId::Prediction, cuCoord, '\n');
 
     /* start: inferrable */
     auto cuTransquantBypassFlag = embed<CuTransquantBypassFlag>(*this);

@@ -39,19 +39,22 @@ struct MvMergeCandList
                 Pair<bool, RefList>{false, false});
     }
 
-    operator std::string () const
+    std::string toStr() const
     {
         std::ostringstream oss;
 
         for(auto i : EnumRange<RefList>())
         {
+            oss << 'L' << int(i) << ' ';
+
             for(auto n = 0; n < numCurrMergeCand; ++n)
             {
                 oss
-                    << 'L' << int(i) << ' '
-                    << mvL[n][i] << ' '
-                    << refIdxL[n][i] << ' '
-                    << predFlagL[n][i] << '\n';
+                    << mvL[n][i]
+                    << " POC " << refIdxL[n][i] << ' '
+                    << " predFlag " << predFlagL[n][i];
+
+                oss << (numCurrMergeCand == n - 1 ? ", " : ";");
             }
         }
 

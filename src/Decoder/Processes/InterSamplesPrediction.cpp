@@ -90,14 +90,16 @@ PredSampleLx predSampleLx(
         }
 
         const auto toStr =
-            [plane, l, width, height, mv, xFracL, yFracL, &dst, coord](std::ostream &oss)
+            [&](std::ostream &oss)
             {
                 oss
-                    << coord
+                    << "coord " << coord << ' ' << coord + PelCoord(h.begin(), v.begin())
                     << " L" << int(l)
                     << " mv" << mv
-                    << " ref" << toPel(mv, Plane::Y == plane ? 2_log2 : 3_log2)
-                    << " (" << xFracL << ", " << yFracL << ")\n";
+                    << " ref["
+                    << "POC " << ref->order.get<PicOrderCntVal>()
+                    << " mv" << toPel(mv, Plane::Y == plane ? 2_log2 : 3_log2)
+                    << " frac(" << xFracL << ", " << yFracL << ")]\n";
 
                 for(auto y = 0_pel; y < height; ++y)
                 {

@@ -1,5 +1,4 @@
-#ifndef MD5Hasher_h
-#define MD5Hasher_h
+#pragma once
 
 #include <cstdint>
 #include <array>
@@ -7,18 +6,26 @@
 #include <iterator>
 #include <ostream>
 #include <iomanip>
-/* 3rdParty */
-#include <ThirdParty/MD5/md5.h>
 
 /*----------------------------------------------------------------------------*/
-class MD5Hasher
+class ChecksumHasher
 {
 public:
-    struct ValueType: public std::array<uint8_t, 128 / 8>
+    struct ValueType: public std::array<uint8_t, 32 / 8>
     {
         ValueType()
         {
             std::fill(std::begin(*this), std::end(*this), 0);
+        }
+
+        uint32_t value() const
+        {
+            return *reinterpret_cast<const uint32_t * const>(data());
+        }
+
+        void value(uint32_t v)
+        {
+            *reinterpret_cast<uint32_t *>(data()) = v;
         }
 
         void toStr(std::ostream &os) const
@@ -39,43 +46,21 @@ public:
         }
     };
 private:
-    md5_state_t m_state;
     ValueType m_value;
-    bool m_done;
 public:
-    MD5Hasher()
-    {
-        clear();
-    }
+    ChecksumHasher()
+    {}
 
-    void clear()
+    void calc(int x, int y, uint8_t data)
     {
-        md5_init(&m_state);
-        m_done = false;
-    }
-
-    void calc(uint8_t *msg, uint64_t length)
-    {
-        md5_append(&m_state, msg, length);
-    }
-
-    void calc(uint8_t msg)
-    {
-        md5_append(&m_state, &msg, 1);
+        uint32_t &checksum = *reinterpret_cast<uint32_t *>(m_value.data());
+        const auto xorMask = (x & 0xFF) ^ (y & 0xFF) ^ (x >> 8) ^ (y >> 8);
+        checksum = (checksum + ((data & 0xFF) ^ xorMask)) & 0xFFFFFFFF;
     }
 
     const ValueType &value()
     {
-        if(!m_done)
-        {
-            md5_finish(&m_state, m_value.data());
-            m_done = true;
-        }
-
         return m_value;
     }
 };
 /*----------------------------------------------------------------------------*/
-
-
-#endif /* MD5Hasher_h */

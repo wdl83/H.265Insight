@@ -18,8 +18,8 @@ void defaultWeighted(
         Structure::PelBuffer &dst)
 {
     /* 04/2013, 8.5.3.3.4.2 "Default weighted sample predition process" */
-    const auto shift = 14 - bitDepth;
-    const auto offset = 0 < shift ? 1 << (shift - 1) : 0;
+    const auto shift = std::max(2, 14 - bitDepth);
+    const auto offset = 1 << (shift - 1);
     const auto max = (1 << bitDepth) - 1;
     const auto width = h.length();
     const auto height = v.length();
@@ -41,7 +41,7 @@ void defaultWeighted(
         Structure::PelBuffer &dst)
 {
     /* 04/2013, 8.5.3.3.4.2 "Default weighted sample predition process" */
-    const auto shift = 15 - bitDepth;
+    const auto shift = std::max(3, 15 - bitDepth);
     const auto offset = 1 << (shift - 1);
     const auto max = (1 << bitDepth) - 1;
     const auto width = h.length();

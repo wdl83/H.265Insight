@@ -100,19 +100,23 @@ MvDerivationLuma::exec(
     }
 
     const auto toStr =
-        [&pu, mvL, refIdxL, predFlagL](std::ostream &oss)
+        [&](std::ostream &oss)
         {
             const auto puCoord = pu.get<PU::Coord>()->inUnits();
+            oss << puCoord;
 
             for(auto X : EnumRange<RefList>())
             {
                 if(predFlagL[X])
                 {
-                    oss << puCoord
+                    oss
+                        <<  " mergeFlag " << bool(*mergeFlag)
                         << " L" << int(X) << ' '
-                        << mvL[X] << ' ' << refIdxL[X] << '\n';
+                        << mvL[X] << " refIdx " << refIdxL[X] << ',';
                 }
             }
+
+            oss << '\n';
         };
 
     log(LogId::MotionVectors, toStr);

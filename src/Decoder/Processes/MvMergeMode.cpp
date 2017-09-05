@@ -134,9 +134,9 @@ MvMergeMode::exec(
 
     {
         const auto toStr =
-            [puCoord, &candList](std::ostream &oss)
+            [&](std::ostream &oss)
             {
-                oss << puCoord << "\nTmprl+Sptl\n" << std::string(candList);
+                oss << puCoord << " Tmprl+Sptl CAND[" << candList.toStr() << "]\n";
             };
 
         log(LogId::MvMergeMode, toStr);
@@ -177,22 +177,24 @@ MvMergeMode::exec(
     }
 
     const auto toStr =
-        [puCoord, &candList, &mergeIdx, mvL, refIdxL, predFlagL](std::ostream &oss)
+        [&](std::ostream &oss)
         {
             oss
-                << puCoord << '\n'
-                << "IDX " << int(*mergeIdx) << '\n'
-                << "CAND\n" << std::string(candList);
+                << puCoord
+                << " IDX " << int(*mergeIdx)
+                << " CAND[" << candList.toStr() << "] ";
 
             for(auto X : EnumRange<RefList>())
             {
                 oss
                     << puCoord
                     << " L" << int(X) << ' '
-                    << mvL[X] << ' '
-                    << refIdxL[X] << ' '
-                    << predFlagL[X] << '\n';
+                    << mvL[X]
+                    << " refIdx " << refIdxL[X] << ' '
+                    << " predFlag " << predFlagL[X] << ' ';
             }
+
+            oss << '\n';
         };
 
     log(LogId::MvMergeMode, toStr);

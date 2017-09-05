@@ -1,21 +1,21 @@
 IF(USE_CLANG)
     # C++ compiler flags
-    SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Wno-parentheses -pedantic -fno-exceptions -Wno-unused-local-typedefs")
+    SET(CMAKE_CXX_FLAGS "-std=c++14 -Wall -Wextra -Wno-parentheses -pedantic -fno-exceptions -Wno-unused-local-typedefs -fwrapv")
     SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DPTR_CHECK -DBDRY_CHECK -DNUMERIC_CHECK" )
     SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -mtune=native -DNO_DEBUG -DNDEBUG -fPIC -rdynamic -Wno-unused-parameter" )
     # C compiler flags
-    SET(CMAKE_C_FLAGS "-std=c99 -Wall -Wextra")
+    SET(CMAKE_C_FLAGS "-std=c99 -Wall -Wextra -fwrapv")
     SET(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
     SET(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     # additional flags
     SET(CMAKE_EXE_LINKER_FLAGS "-lstdc++ -lpthread -lm")
 ELSE(USE_CLANG)
     # C++ compiler flags
-    SET(CMAKE_CXX_FLAGS "-std=c++11 -pipe -fstack-protector-all -Wall -Wextra -Wno-parentheses -pedantic -Wno-unused-local-typedefs -fdiagnostics-color=always -fno-exceptions" )
+    SET(CMAKE_CXX_FLAGS "-std=c++14 -pipe -fstack-protector-all -Wall -Wextra -Wno-parentheses -pedantic -Wno-unused-local-typedefs -fdiagnostics-color=always -fno-exceptions -fwrapv" )
     SET(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -fno-omit-frame-pointer -DPTR_CHECK -DBDRY_CHECK -DNUMERIC_CHECK" )
     SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -mtune=native -DNO_DEBUG -DNDEBUG -fPIC -rdynamic -Wno-unused-parameter" )
     # C compiler flags
-    SET(CMAKE_C_FLAGS "-std=c99 -Wall -Wextra")
+    SET(CMAKE_C_FLAGS "-std=c99 -Wall -Wextra -fwrapv")
     SET(CMAKE_C_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
     SET(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
     # additional flags

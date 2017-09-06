@@ -216,7 +216,9 @@ const std::string &getName(ElementId id)
         "pps_extension_present_flag",
         "pps_range_extension_flag",
         "pps_multilayer_extension_flag",
-        "pps_extension_6bits",
+        "pps_3d_extension_flag",
+        "pps_scc_extension_flag",
+        "pps_extension_4bits",
         "pps_extension_data_flag",
         /* PpsRangeExtension */
         "pps_range_extension",

@@ -14,7 +14,7 @@ env:
   - COMPILER=clang++-3.8 BUILD_TYPE=RELEASE
 
 before_install:
-  - docker build -t testing -f ci/testing.docker .
+  - docker build -t testing -f ci/toolchain.docker .
 
 script:
-  - docker run --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 testing /bin/bash -c "bash ./ci/run.sh"
+  - docker run -v $(pwd):/h265 --env=CXX=$COMPILER --env=BUILD_TYPE=$BUILD_TYPE --workdir=/h265 testing /bin/bash -c "bash ./ci/run.sh"

@@ -39,7 +39,9 @@ void PictureParameterSet::onParse(
     auto diffCuQpDeltaDepth = embed<DiffCuQpDeltaDepth>(*this);
     auto ppsRangeExtensionFlag = embed<PpsRangeExtensionFlag>(*this);
     auto ppsMultilayerExtensionFlag = embed<PpsMultilayerExtensionFlag>(*this);
-    auto ppsExtension6Bits = embed<PpsExtension6Bits>(*this);
+    auto pps3dExtensionFlag = embed<Pps3dExtensionFlag>(*this);
+    auto ppsSccExtensionFlag = embed<PpsSccExtensionFlag>(*this);
+    auto ppsExtension4Bits = embed<PpsExtension4Bits>(*this);
     /* end: inferrable */
 
     auto ppsPicParameterSetId = embed<PpsPicParameterSetId>(*this);
@@ -174,7 +176,9 @@ void PictureParameterSet::onParse(
     {
         parse(streamAccessLayer, decoder, *ppsRangeExtensionFlag);
         parse(streamAccessLayer, decoder, *ppsMultilayerExtensionFlag);
-        parse(streamAccessLayer, decoder, *ppsExtension6Bits);
+        parse(streamAccessLayer, decoder, *pps3dExtensionFlag);
+        parse(streamAccessLayer, decoder, *ppsSccExtensionFlag);
+        parse(streamAccessLayer, decoder, *ppsExtension4Bits);
     }
 
     if(*ppsRangeExtensionFlag)
@@ -187,7 +191,19 @@ void PictureParameterSet::onParse(
         parse(streamAccessLayer, decoder, *embedSubtree<PpsMultilayerExtension>(*this));
     }
 
-    if(ppsExtension6Bits->inUnits())
+    if(*pps3dExtensionFlag)
+    {
+        /* not supported */
+        syntaxCheck(false);
+    }
+
+    if(*ppsSccExtensionFlag)
+    {
+        /* not supported */
+        syntaxCheck(false);
+    }
+
+    if(ppsExtension4Bits->inUnits())
     {
         auto ppsExtensionDataFlag = embed<PpsExtensionDataFlag>(*this);
 

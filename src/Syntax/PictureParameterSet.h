@@ -633,22 +633,49 @@ struct PpsMultilayerExtensionFlag:
     }
 };
 /*----------------------------------------------------------------------------*/
-struct PpsExtension6Bits:
+struct Pps3dExtensionFlag:
     public Embedded,
-    public VLD::FixedUInt<6, uint8_t>
+    public VLD::FixedUInt<1, uint8_t>
 {
-    static const auto Id = ElementId::pps_extension_6bits;
+    static const auto Id = ElementId::pps_3d_extension_flag;
 
-    PpsExtension6Bits()
+    Pps3dExtensionFlag()
     {
-        /* 10/2014, 7.4.3.2.1 "General sequence parameter set RBSP semantics" */
+        /* 12/2016, 7.4.3.3.1 "General sequence parameter set RBSP semantics" */
         setValue(false);
     }
 
-    uint8_t inUnits() const
+    explicit operator bool () const {return getValue();}
+};
+/*----------------------------------------------------------------------------*/
+struct PpsSccExtensionFlag:
+    public Embedded,
+    public VLD::FixedUInt<1, uint8_t>
+{
+    static const auto Id = ElementId::pps_scc_extension_flag;
+
+    PpsSccExtensionFlag()
     {
-        return getValue();
+        /* 12/2016, 7.4.3.3.1 "General sequence parameter set RBSP semantics" */
+        setValue(false);
     }
+
+    explicit operator bool () const {return getValue();}
+};
+/*----------------------------------------------------------------------------*/
+struct PpsExtension4Bits:
+    public Embedded,
+    public VLD::FixedUInt<4, uint8_t>
+{
+    static const auto Id = ElementId::pps_extension_4bits;
+
+    PpsExtension4Bits()
+    {
+        /* 12/2016, 7.4.3.3.1 "General sequence parameter set RBSP semantics" */
+        setValue(false);
+    }
+
+    uint8_t inUnits() const {return getValue();}
 };
 /*----------------------------------------------------------------------------*/
 class PpsExtensionDataFlag:
@@ -712,7 +739,9 @@ class PictureParameterSet:
         PictureParameterSetContent::PpsExtensionPresentFlag,
         PictureParameterSetContent::PpsRangeExtensionFlag,
         PictureParameterSetContent::PpsMultilayerExtensionFlag,
-        PictureParameterSetContent::PpsExtension6Bits,
+        PictureParameterSetContent::Pps3dExtensionFlag,
+        PictureParameterSetContent::PpsSccExtensionFlag,
+        PictureParameterSetContent::PpsExtension4Bits,
         PictureParameterSetContent::PpsExtensionDataFlag>,
     public SubtreeAggregator<
         ScalingListData,
@@ -764,7 +793,9 @@ public:
     typedef PictureParameterSetContent::PpsExtensionPresentFlag PpsExtensionPresentFlag;
     typedef PictureParameterSetContent::PpsRangeExtensionFlag PpsRangeExtensionFlag;
     typedef PictureParameterSetContent::PpsMultilayerExtensionFlag PpsMultilayerExtensionFlag;
-    typedef PictureParameterSetContent::PpsExtension6Bits PpsExtension6Bits;
+    typedef PictureParameterSetContent::Pps3dExtensionFlag Pps3dExtensionFlag;
+    typedef PictureParameterSetContent::PpsSccExtensionFlag PpsSccExtensionFlag;
+    typedef PictureParameterSetContent::PpsExtension4Bits PpsExtension4Bits;
     typedef PictureParameterSetContent::PpsExtensionDataFlag PpsExtensionDataFlag;
 
     void toStr(std::ostream &) const;

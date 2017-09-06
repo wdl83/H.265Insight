@@ -1,9 +1,9 @@
 FROM debian:testing
 
 RUN apt-get update
-RUN apt-get install -y g++-4.9
 RUN apt-get install -y g++-5
 RUN apt-get install -y g++-6
+RUN apt-get install -y g++-7
 RUN apt-get install -y clang-3.8
 RUN apt-get install -y unzip
 RUN apt-get install -y make

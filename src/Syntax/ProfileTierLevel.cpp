@@ -38,10 +38,16 @@ void ProfileTierLevel::onParse(
                 || 5 == generalProfileIdc->inUnits()
                 || 6 == generalProfileIdc->inUnits()
                 || 7 == generalProfileIdc->inUnits()
+                || 8 == generalProfileIdc->inUnits()
+                || 9 == generalProfileIdc->inUnits()
+                || 10 == generalProfileIdc->inUnits()
                 || (*generalProfileCompatibilityFlag)[4]
                 || (*generalProfileCompatibilityFlag)[5]
                 || (*generalProfileCompatibilityFlag)[6]
-                || (*generalProfileCompatibilityFlag)[7])
+                || (*generalProfileCompatibilityFlag)[7]
+                || (*generalProfileCompatibilityFlag)[8]
+                || (*generalProfileCompatibilityFlag)[9]
+                || (*generalProfileCompatibilityFlag)[10])
         {
             parse(streamAccessLayer, decoder, *embed<GeneralMax12BitConstraintFlag>(*this));
             parse(streamAccessLayer, decoder, *embed<GeneralMax10BitConstraintFlag>(*this));
@@ -52,7 +58,22 @@ void ProfileTierLevel::onParse(
             parse(streamAccessLayer, decoder, *embed<GeneralIntraConstraintFlag>(*this));
             parse(streamAccessLayer, decoder, *embed<GeneralOnePictureOnlyConstraintFlag>(*this));
             parse(streamAccessLayer, decoder, *embed<GeneralLowerBitRateConstraintFlag>(*this));
-            parse(streamAccessLayer, decoder, *embed<GeneralReservedZero34Bits>(*this));
+
+            if(
+                    5 == generalProfileIdc->inUnits()
+                    || 9 == generalProfileIdc->inUnits()
+                    || 10 == generalProfileIdc->inUnits()
+                    || (*generalProfileCompatibilityFlag)[5]
+                    || (*generalProfileCompatibilityFlag)[9]
+                    || (*generalProfileCompatibilityFlag)[10])
+            {
+                parse(streamAccessLayer, decoder, *embed<GeneralMax14BitConstraintFlag>(*this));
+                parse(streamAccessLayer, decoder, *embed<GeneralReservedZero33Bits>(*this));
+            }
+            else
+            {
+                parse(streamAccessLayer, decoder, *embed<GeneralReservedZero34Bits>(*this));
+            }
         }
         else
         {
@@ -61,11 +82,13 @@ void ProfileTierLevel::onParse(
 
         if(
                 (1 <= generalProfileIdc->inUnits() && 5 >= generalProfileIdc->inUnits())
+                || 9 == generalProfileIdc->inUnits()
                 || (*generalProfileCompatibilityFlag)[1]
                 || (*generalProfileCompatibilityFlag)[2]
                 || (*generalProfileCompatibilityFlag)[3]
                 || (*generalProfileCompatibilityFlag)[4]
-                || (*generalProfileCompatibilityFlag)[5])
+                || (*generalProfileCompatibilityFlag)[5]
+                || (*generalProfileCompatibilityFlag)[9])
         {
             parse(streamAccessLayer, decoder, *embed<GeneralInbldFlag>(*this));
         }
@@ -115,6 +138,8 @@ void ProfileTierLevel::onParse(
         auto subLayerIntraConstraintFlag = embed<SubLayerIntraConstraintFlag>(*this);
         auto subLayerOnePictureOnlyConstraintFlag = embed<SubLayerOnePictureOnlyConstraintFlag>(*this);
         auto subLayerLowerBitRateConstraintFlag = embed<SubLayerLowerBitRateConstraintFlag>(*this);
+        auto subLayerMax14BitConstraintFlag = embed<SubLayerMax14BitConstraintFlag>(*this);
+        auto subLayerReservedZero33Bits = embed<SubLayerReservedZero33Bits>(*this);
         auto subLayerReservedZero34Bits = embed<SubLayerReservedZero34Bits>(*this);
         auto subLayerReservedZero43Bits = embed<SubLayerReservedZero43Bits>(*this);
         auto subLayerInbldFlag = embed<SubLayerInbldFlag>(*this);
@@ -144,10 +169,16 @@ void ProfileTierLevel::onParse(
                         || 5 == (*subLayerProfileIdc)[i]
                         || 6 == (*subLayerProfileIdc)[i]
                         || 7 == (*subLayerProfileIdc)[i]
+                        || 8 == (*subLayerProfileIdc)[i]
+                        || 9 == (*subLayerProfileIdc)[i]
+                        || 10 == (*subLayerProfileIdc)[i]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 4)]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 5)]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 6)]
-                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 7)])
+                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 7)]
+                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 8)]
+                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 9)]
+                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 10)])
                 {
                     parse(streamAccessLayer, decoder, *subLayerMax12BitConstraintFlag, i);
                     parse(streamAccessLayer, decoder, *subLayerMax10BitConstraintFlag, i);
@@ -158,7 +189,18 @@ void ProfileTierLevel::onParse(
                     parse(streamAccessLayer, decoder, *subLayerIntraConstraintFlag, i);
                     parse(streamAccessLayer, decoder, *subLayerOnePictureOnlyConstraintFlag, i);
                     parse(streamAccessLayer, decoder, *subLayerLowerBitRateConstraintFlag, i);
-                    parse(streamAccessLayer, decoder, *subLayerReservedZero34Bits);
+
+                    if(
+                            5 == (*subLayerProfileIdc)[i]
+                            || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 5)])
+                    {
+                        parse(streamAccessLayer, decoder, *subLayerMax14BitConstraintFlag);
+                        parse(streamAccessLayer, decoder, *subLayerReservedZero33Bits);
+                    }
+                    else
+                    {
+                        parse(streamAccessLayer, decoder, *subLayerReservedZero34Bits);
+                    }
                 }
                 else
                 {
@@ -167,11 +209,13 @@ void ProfileTierLevel::onParse(
 
                 if(
                         (1 <= (*subLayerProfileIdc)[i] && 5 >= (*subLayerProfileIdc)[i])
+                        || 9 == (*subLayerProfileIdc)[i]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 1)]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 2)]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 3)]
                         || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 4)]
-                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 5)])
+                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 5)]
+                        || (*subLayerProfileCompatibilityFlag)[std::make_pair(i, 9)])
                 {
                     parse(streamAccessLayer, decoder, *subLayerInbldFlag, i);
                 }

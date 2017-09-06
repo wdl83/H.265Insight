@@ -160,6 +160,20 @@ struct GeneralLowerBitRateConstraintFlag:
     static const auto Id = ElementId::general_lower_bit_rate_constraint_flag;
 };
 
+struct GeneralMax14BitConstraintFlag:
+    public Embedded,
+    public VLD::FixedUInt<1, uint8_t>
+{
+    static const auto Id = ElementId::general_max_14bit_constraint_flag;
+};
+
+struct GeneralReservedZero33Bits:
+    public Embedded,
+    public VLD::FixedUInt<33, uint64_t>
+{
+    static const auto Id = ElementId::general_reserved_zero_33bits;
+};
+
 struct GeneralReservedZero34Bits:
     public Embedded,
     public VLD::FixedUInt<34, uint64_t>
@@ -498,6 +512,20 @@ struct SubLayerLowerBitRateConstraintFlag:
     }
 };
 
+struct SubLayerMax14BitConstraintFlag:
+    public Embedded,
+    public VLD::FixedUInt<1, uint8_t>
+{
+    static const auto Id = ElementId::sub_layer_max_14bit_constraint_flag;
+};
+
+struct SubLayerReservedZero33Bits:
+    public Embedded,
+    public VLD::FixedUInt<33, uint64_t>
+{
+    static const auto Id = ElementId::sub_layer_reserved_zero_33bits;
+};
+
 struct SubLayerReservedZero34Bits:
     public Embedded,
     public VLD::FixedUInt<34, uint64_t>
@@ -569,6 +597,8 @@ class ProfileTierLevel:
         ProfileTierLevelContent::GeneralIntraConstraintFlag,
         ProfileTierLevelContent::GeneralOnePictureOnlyConstraintFlag,
         ProfileTierLevelContent::GeneralLowerBitRateConstraintFlag,
+        ProfileTierLevelContent::GeneralMax14BitConstraintFlag,
+        ProfileTierLevelContent::GeneralReservedZero33Bits,
         ProfileTierLevelContent::GeneralReservedZero34Bits,
         ProfileTierLevelContent::GeneralReservedZero43Bits,
         ProfileTierLevelContent::GeneralInbldFlag,
@@ -594,6 +624,8 @@ class ProfileTierLevel:
         ProfileTierLevelContent::SubLayerIntraConstraintFlag,
         ProfileTierLevelContent::SubLayerOnePictureOnlyConstraintFlag,
         ProfileTierLevelContent::SubLayerLowerBitRateConstraintFlag,
+        ProfileTierLevelContent::SubLayerMax14BitConstraintFlag,
+        ProfileTierLevelContent::SubLayerReservedZero33Bits,
         ProfileTierLevelContent::SubLayerReservedZero34Bits,
         ProfileTierLevelContent::SubLayerReservedZero43Bits,
         ProfileTierLevelContent::SubLayerInbldFlag,
@@ -620,6 +652,8 @@ public:
     typedef ProfileTierLevelContent::GeneralIntraConstraintFlag GeneralIntraConstraintFlag;
     typedef ProfileTierLevelContent::GeneralOnePictureOnlyConstraintFlag GeneralOnePictureOnlyConstraintFlag;
     typedef ProfileTierLevelContent::GeneralLowerBitRateConstraintFlag GeneralLowerBitRateConstraintFlag;
+    typedef ProfileTierLevelContent::GeneralMax14BitConstraintFlag GeneralMax14BitConstraintFlag;
+    typedef ProfileTierLevelContent::GeneralReservedZero33Bits GeneralReservedZero33Bits;
     typedef ProfileTierLevelContent::GeneralReservedZero34Bits GeneralReservedZero34Bits;
     typedef ProfileTierLevelContent::GeneralReservedZero43Bits GeneralReservedZero43Bits;
     typedef ProfileTierLevelContent::GeneralInbldFlag GeneralInbldFlag;
@@ -645,6 +679,8 @@ public:
     typedef ProfileTierLevelContent::SubLayerIntraConstraintFlag SubLayerIntraConstraintFlag;
     typedef ProfileTierLevelContent::SubLayerOnePictureOnlyConstraintFlag SubLayerOnePictureOnlyConstraintFlag;
     typedef ProfileTierLevelContent::SubLayerLowerBitRateConstraintFlag SubLayerLowerBitRateConstraintFlag;
+    typedef ProfileTierLevelContent::SubLayerMax14BitConstraintFlag SubLayerMax14BitConstraintFlag;
+    typedef ProfileTierLevelContent::SubLayerReservedZero33Bits SubLayerReservedZero33Bits;
     typedef ProfileTierLevelContent::SubLayerReservedZero34Bits SubLayerReservedZero34Bits;
     typedef ProfileTierLevelContent::SubLayerReservedZero43Bits SubLayerReservedZero43Bits;
     typedef ProfileTierLevelContent::SubLayerInbldFlag SubLayerInbldFlag;

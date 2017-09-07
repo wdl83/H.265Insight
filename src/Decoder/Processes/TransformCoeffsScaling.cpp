@@ -113,7 +113,7 @@ void TransformCoeffsScaling::exec(
     const auto min = minCoeff(extendedPrecisionProcessingFlag, bitDepth);
     const auto max = maxCoeff(extendedPrecisionProcessingFlag, bitDepth);
     // (8-310)
-    const auto scalingFactor16 = !scalingListEnabledFlag || transformSkipFlag && 2_log2 > rcSize;
+    const auto scalingFactor16 = !scalingListEnabledFlag || transformSkipFlag && 2_log2 < rcSize;
     const auto qp = calcQp(picture, cu, plane);
     // (8-311)
     const auto qpQuotient = qp / 6;

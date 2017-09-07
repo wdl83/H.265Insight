@@ -34,15 +34,13 @@ void skipTransform(
             {
                 const auto atA = base + PelCoord{x, y};
                 const auto atB = base + PelCoord{side - 1_pel - x, side - 1_pel - y};
-                // 2 (shift)
-                const auto shiftedA = int32_t(r[atA]) << tsShift;
-                const auto shiftedB = int32_t(r[atB]) << tsShift;
-                // 3 (bdShift)
+                // 2 (8-300)
+                const auto shiftedA = int64_t(r[atA]) << tsShift;
+                const auto shiftedB = int64_t(r[atB]) << tsShift;
+                // 3 (8-301)
                 const auto unClippedA = (shiftedA + bdOffset) >> bdShift;
                 const auto unClippedB = (shiftedB + bdOffset) >> bdShift;
 
-                runtime_assert(!overflow(shiftedA, bdOffset));
-                runtime_assert(!overflow(shiftedB, bdOffset));
                 /* WARNING: this clip3 is not part of 04/2013 specification,
                  * but is required by implementation */
                 r[atA] = clip3(min, max, unClippedB);
@@ -57,12 +55,11 @@ void skipTransform(
             for(auto x = 0_pel; x < side; ++x)
             {
                 const auto at = base + PelCoord{x, y};
-                // 2 (shift)
-                const auto shifted = int32_t(r[at]) << tsShift;
-                // 3 (bdShift)
+                // 2 (8-300)
+                const auto shifted = int64_t(r[at]) << tsShift;
+                // 3 (8-301)
                 const auto unClipped = (shifted + bdOffset) >> bdShift;
 
-                runtime_assert(!overflow(shifted, bdOffset));
                 /* WARNING: this clip3 is not part of 04/2013 specification,
                  * but is required by implementation */
                 r[at] = clip3(min, max, unClipped);
@@ -104,7 +101,9 @@ void Residuals::exec(
         Ptr<Structure::Picture> picture,
         const Syntax::ResidualCoding &rc)
 {
-    /* 04/2013, 8.6.2 "Scaling and transformation process" */
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.2 "Scaling and transformation process" */
+
     using namespace Syntax;
 
     typedef CodingUnit CU;
@@ -112,7 +111,6 @@ void Residuals::exec(
     typedef SpsRangeExtension SPSRE;
 
     const auto spsre = picture->spsre;
-
     const auto extendedPrecisionProcessingFlag =
         spsre && bool(*spsre->get<SPSRE::ExtendedPrecisionProcessingFlag>());
     const auto transformSkipRotationEnabledFlag =
@@ -136,6 +134,7 @@ void Residuals::exec(
     const auto bitDepth = picture->bitDepth(plane);
     const auto min = minCoeff(extendedPrecisionProcessingFlag, bitDepth);
     const auto max = maxCoeff(extendedPrecisionProcessingFlag, bitDepth);
+    // 8.6.2 rotateCoeffs
     const auto rotate = transformSkipRotationEnabledFlag && 2_log2 == rcSize && isIntra;
 
     const auto intraPredictionMode =
@@ -157,15 +156,13 @@ void Residuals::exec(
 
     if(!cuTransquantBypassFlag)
     {
+        // (8-297)
         const auto bdShift = std::max(20 - bitDepth, extendedPrecisionProcessingFlag ? 11 : 0);
         const auto bdOffset = 1 << (bdShift - 1);
-        const auto tsShift =
-            toUnderlying(rcSize)
-            + (
-                    extendedPrecisionProcessingFlag
-                    ? std::min(5, bdShift - 2) : 5);
+        //(8-298)
+        const auto tsShift = toUnderlying(rcSize) + (extendedPrecisionProcessingFlag ? std::min(5, bdShift - 2) : 5);
 
-        // 1 (scale transform coefficients)
+        // 1 (call 8.6.3)
         process(decoder, TransformCoeffsScaling(), picture, *cu, rc);
         // 2
         if(transformSkipFlag)
@@ -184,6 +181,7 @@ void Residuals::exec(
     }
     else if(rotate)
     {
+        // (8-299)
         const auto side = toPel(rcSize);
         const auto sideDiv2 = toPel(rcSize - 1_log2);
 
@@ -196,6 +194,10 @@ void Residuals::exec(
                 std::swap(r[atA], r[atB]);
             }
         }
+    }
+    else
+    {
+        // residuals are equal to transform coeff levels
     }
 
     if(intraRDPCM)

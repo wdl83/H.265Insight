@@ -1052,8 +1052,12 @@ enum class QP
 inline
 int qPiToQpC(int qPi, ChromaFormatIdc chromaFormatIdc)
 {
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.1 "Derivation process for quantization parameters" */
+
     const auto is420 = ChromaFormatIdc::f420 == chromaFormatIdc;
 
+    /* Table 8-10 */
     if(!is420)
     {
         return std::min(qPi, 51);
@@ -1107,8 +1111,9 @@ enum class AspectRatioIdc
     EXTENDED_SAR = 255
 };
 
-/* epp: Extended Precision Processing
- * hpo: High Precision Offsets */
+/* ITU-T H.265 v4 12/2016
+ * 7.4.3.2.2 "Sequence parameter set range extension semantics"
+ * epp: Extended Precision Processing */
 inline
 int minCoeff(bool epp, int bitDepth)
 {
@@ -1121,6 +1126,9 @@ int maxCoeff(bool epp, int bitDepth)
     return (1 << (epp ? std::max(15, bitDepth + 6) : 15)) - 1;
 }
 
+/* ITU-T H.265 v4 12/2016
+ * 7.4.3.2.2 "Sequence parameter set range extension semantics"
+ * hpo: High Precision Offsets */
 inline
 int weightedPredictionOffsetBdShift(bool hpo, int bitDepth)
 {

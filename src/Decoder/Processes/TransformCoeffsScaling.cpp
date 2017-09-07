@@ -11,6 +11,9 @@
 
 namespace HEVC { namespace Decoder { namespace Processes {
 
+
+/* ITU-T H.265 v4 12/2016
+ * 8.6.3 "Scaling process for transform coefficients" */
 typedef std::array<int8_t, 6> LevelScale;
 
 static const LevelScale levelScale =
@@ -21,7 +24,7 @@ static const LevelScale levelScale =
 namespace {
 /*----------------------------------------------------------------------------*/
 int calcQp(
-        Ptr<const Structure::Picture>,
+        Ptr<const Structure::Picture> picture,
         const Syntax::CodingUnit &cu,
         Plane plane)
 {
@@ -29,13 +32,29 @@ int calcQp(
 
     typedef CodingUnit CU;
 
+    const auto calcQpY =
+        [picture](int qpPrimeY)
+        {
+            const auto qpBdOffsetY = picture->qpBdOffset(Component::Luma);
+            // (8-293)
+            return clip3(0, 51 + qpBdOffsetY, qpPrimeY);
+        };
+
+    const auto calcQpC =
+        [](int qpPrimeC)
+        {
+            // (8-294)
+            // (8-295)
+            return qpPrimeC;
+        };
+
     return
         Plane::Cb == plane
-        ? cu.get<CU::QpC>()->qpPrimeCb
+        ? calcQpC(cu.get<CU::QpC>()->qpPrimeCb)
         : (
                 Plane::Cr == plane
-                ? cu.get<CU::QpC>()->qpPrimeCr
-                : cu.get<CU::QpY>()->qpPrimeY);
+                ? calcQpC(cu.get<CU::QpC>()->qpPrimeCr)
+                : calcQpY(cu.get<CU::QpY>()->qpPrimeY));
 }
 /*----------------------------------------------------------------------------*/
 const Structure::ScalingFactor::Factor &getFactor(
@@ -47,7 +66,6 @@ const Structure::ScalingFactor::Factor &getFactor(
     using namespace Syntax;
 
     const auto side = toInt(size);
-
     const auto sizeId = toSizeId(side);
     const auto cuPredMode = cu.get<CodingUnit::CuPredMode>();
     const auto matrixId = toMatrixId(plane, *cuPredMode);
@@ -63,6 +81,10 @@ void TransformCoeffsScaling::exec(
         const Syntax::CodingUnit &cu,
         const Syntax::ResidualCoding &rc)
 {
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.2 "Scaling and transformation process"
+     * 8.6.3 "Scaling process for transform coefficients" */
+
     using namespace Syntax;
 
     typedef SequenceParameterSet SPS;
@@ -72,46 +94,41 @@ void TransformCoeffsScaling::exec(
 
     const auto sps = picture->sps;
     const auto spsre = picture->spsre;
-    const auto extendedPrecisionProcessingFlag =
-        spsre && bool(*spsre->get<SPSRE::ExtendedPrecisionProcessingFlag>());
-
+    const auto extendedPrecisionProcessingFlag = spsre && bool(*spsre->get<SPSRE::ExtendedPrecisionProcessingFlag>());
     const bool scalingListEnabledFlag(*sps->get<SPS::ScalingListEnabledFlag>());
-    const auto rcCoord = rc.get<RC::Coord>()->inUnits();
-    const auto rcSize = rc.get<RC::Size>()->inUnits();
     const Plane plane = *rc.get<RC::CIdx>();
+    const auto rcCoord = rc.get<RC::Coord>()->inUnits();
+    const auto coord = scale(rcCoord, plane, picture->chromaFormatIdc);
+    const auto rcSize = rc.get<RC::Size>()->inUnits();
+    const auto side = toPel(rcSize);
+    const auto &f = getFactor(decoder, picture, cu, plane, rcSize);
+    auto &residuals = picture->pelBuffer(PelLayerId::Residual, plane);
     const bool transformSkipFlag(*rc.get<RC::TransformSkipFlag>());
     const auto bitDepth = picture->bitDepth(plane);
-
-    const auto transformRange =
-        extendedPrecisionProcessingFlag
-        ? std::max(15_log2, Log2{bitDepth} + 6_log2)
-        : 15_log2;
-    const int bdShift = bitDepth + toUnderlying(rcSize) + 10 - toUnderlying(transformRange);
-    const int64_t bdOffset = 1 << (bdShift - 1);
+    // (8-302), (8-306)
+    const auto transformRange = extendedPrecisionProcessingFlag ? std::max(15_log2, Log2{bitDepth} + 6_log2) : 15_log2;
+    // (8-303), (8-307)
+    const auto bdShift = bitDepth + toUnderlying(rcSize) + 10 - toUnderlying(transformRange);
+    // (8-304), (8-305), (8-308), (8-309)
     const auto min = minCoeff(extendedPrecisionProcessingFlag, bitDepth);
     const auto max = maxCoeff(extendedPrecisionProcessingFlag, bitDepth);
-
-    const auto coord = scale(rcCoord, plane, picture->chromaFormatIdc);
+    // (8-310)
+    const auto scalingFactor16 = !scalingListEnabledFlag || transformSkipFlag && 2_log2 > rcSize;
     const auto qp = calcQp(picture, cu, plane);
+    // (8-311)
     const auto qpQuotient = qp / 6;
     const auto qpRemainder = qp % 6;
     const int64_t scale = levelScale[qpRemainder];
-    const auto &f = getFactor(decoder, picture, cu, plane, rcSize);
-    const auto side = toPel(rcSize);
-    auto &residuals = picture->pelBuffer(PelLayerId::Residual, plane);
+    // (8-311)
+    const int64_t bdOffset = 1 << (bdShift - 1);
 
     for(auto y = 0_pel; y < side; ++y)
     {
         for(auto x = 0_pel; x < side; ++x)
         {
             const auto at = coord + PelCoord{x, y};
+            const int64_t m = scalingFactor16 ? 16 : f[Factor::Pos(toUnderlying(x), toUnderlying(y))];
             const int64_t level = residuals[at];
-
-            const int64_t m =
-                !scalingListEnabledFlag || transformSkipFlag && 2_log2 > rcSize
-                ? 16
-                : f[Factor::Pos(toUnderlying(x), toUnderlying(y))];
-
             const int64_t value = (((level * m * scale) << qpQuotient) + bdOffset) >> bdShift;
             const auto clippedValue = clip3(min, max, value);
             residuals[at] = clippedValue;
@@ -119,9 +136,12 @@ void TransformCoeffsScaling::exec(
     }
 
     const auto toStr =
-        [coord, rcSize, &residuals](std::ostream &oss)
+        [&](std::ostream &oss)
         {
-            oss << coord << '\n';
+            oss << coord;
+            oss << " scale " << scale;
+            if(scalingFactor16) oss << " SF16";
+            oss << '\n';
 
             for(auto y = 0_pel; y < toPel(rcSize); ++y)
             {

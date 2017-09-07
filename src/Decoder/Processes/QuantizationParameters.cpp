@@ -16,6 +16,9 @@ std::tuple<int, int> deriveQpC(
         int qpY,
         int cuQpOffsetCb, int cuQpOffsetCr)
 {
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.1 "Derivation process for quantization parameters" */
+
     using namespace Syntax;
 
     typedef PictureParameterSet PPS;
@@ -29,9 +32,13 @@ std::tuple<int, int> deriveQpC(
     const auto ppsCrQpOffset = pps->get<PPS::PpsCrQpOffset>()->inUnits();
     const auto sliceCbQpOffset = sh->get<SSH::SliceCbQpOffset>()->inUnits();
     const auto sliceCrQpOffset = sh->get<SSH::SliceCrQpOffset>()->inUnits();
+    // (8-287)
     const auto qPiCb = clip3(-qpBdOffsetC, 57, qpY + ppsCbQpOffset + sliceCbQpOffset + cuQpOffsetCb);
+    // (8-288)
     const auto qPiCr = clip3(-qpBdOffsetC, 57, qpY + ppsCrQpOffset + sliceCrQpOffset + cuQpOffsetCr);
+    // (8-291)
     const auto qpPrimeCb = qPiToQpC(qPiCb, chromaFormatIdc) + qpBdOffsetC;
+    // (8-292)
     const auto qpPrimeCr = qPiToQpC(qPiCr, chromaFormatIdc) + qpBdOffsetC;
 
     return std::make_tuple(qpPrimeCb, qpPrimeCr);
@@ -41,14 +48,16 @@ int deriveQpYprev(
         Ptr<const Structure::Picture> picture,
         PelCoord curr, PelCoord currMinQpGrp)
 {
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.1 "Derivation process for quantization parameters" */
+
     // 1
     using namespace Syntax;
-
-    typedef CodingUnit CU;
 
     typedef PictureParameterSet PPS;
     typedef SliceSegmentHeader SSH;
     typedef CodingTreeUnit CTU;
+    typedef CodingUnit CU;
 
     const auto isFirstInSlice =
         [picture, currMinQpGrp]()
@@ -233,6 +242,9 @@ int deriveQpYpred(
         Ptr<const Structure::Picture> picture,
         PelCoord curr, PelCoord currMinQpGrp)
 {
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.1 "Derivation process for quantization parameters" */
+
     /* names mapping:
      * curr == (xCb, yCb),
      * currMinQpGrp == (xQg, yQg) */
@@ -250,6 +262,7 @@ int deriveQpYpred(
                 curr, currMinQpGrp,
                 PelCoord{currMinQpGrp.x(), currMinQpGrp.y() - 1_pel});
 
+    // 4 (8-284)
     const auto qpYpred = (qpYa + qpYb + 1) >> 1;
 
     return qpYpred;
@@ -260,13 +273,18 @@ std::tuple<int, int> deriveQpY(
         int qpYpred,
         int cuQpDeltaVal)
 {
+    /* ITU-T H.265 v4 12/2016
+     * 8.6.1 "Derivation process for quantization parameters" */
+
     const auto qpBdOffsetY = picture->qpBdOffset(Component::Luma);
 
+    // (8-285)
     const int qpY =
         ((qpYpred + cuQpDeltaVal + 52 + 2 * qpBdOffsetY)
          % (52 + qpBdOffsetY))
         - qpBdOffsetY;
 
+    // (8-286)
     const auto qpPrimeY = qpY + qpBdOffsetY;
 
     return std::make_tuple(qpY, qpPrimeY);

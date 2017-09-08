@@ -186,7 +186,7 @@ void IntraSamplesPrediction::exec(
         adjSamples =
             subprocess(
                     decoder, IntraAdjFiltering(),
-                    picture, plane, inPlaneSize, predModeIntra, std::move(adjSamples));
+                    picture, coord, plane, inPlaneSize, predModeIntra, std::move(adjSamples));
     }
 
     runtime_assert(adjSamples.areAllAvailable());

@@ -49,8 +49,8 @@ bool deriveBiIntFlag(
     if(Plane::Y == plane && 5_log2 == size)
     {
         const auto sps = picture.sps;
-        const auto strongIntraSmoothingEnabledFlag =
-            sps->get<SPS::StrongIntraSmoothingEnabledFlag>();
+        const bool strongIntraSmoothingEnabledFlag =
+            bool(*sps->get<SPS::StrongIntraSmoothingEnabledFlag>());
         const auto bitDepthY = picture.bitDepth(Component::Luma);
 
         const auto sideEnd = adj.getSideEnd();
@@ -73,7 +73,7 @@ bool deriveBiIntFlag(
             std::abs(topLeft + bottomLeft - 2 * leftMiddle) < (1 << (bitDepthY - 5));
 
         const auto biIntFlag =
-            *strongIntraSmoothingEnabledFlag
+            strongIntraSmoothingEnabledFlag
             && topBelowAvg
             && bottomBelowAvg;
 
@@ -83,16 +83,10 @@ bool deriveBiIntFlag(
     return false;
 }
 /*----------------------------------------------------------------------------*/
-IntraAdjSamples result(Plane plane, IntraAdjSamples &&adj)
+IntraAdjSamples result(
+        Plane plane,
+        IntraAdjSamples &&adj)
 {
-    const auto toStr =
-        [&](std::ostream &oss)
-        {
-            adj.writeTo(
-                    oss,
-                    [](std::ostream &os, IntraAdjSamples::AdjSample i) {pelFmt(os, *i);});
-        };
-
     const LogId logId[] =
     {
         LogId::IntraAdjFilteredSamplesY,
@@ -100,7 +94,15 @@ IntraAdjSamples result(Plane plane, IntraAdjSamples &&adj)
         LogId::IntraAdjFilteredSamplesCr
     };
 
-    log(logId[int(plane)], toStr);
+    log(
+        logId[int(plane)],
+        [&](std::ostream &oss)
+        {
+            adj.writeTo(
+                    oss,
+                    [](std::ostream &os, IntraAdjSamples::AdjSample i) {pelFmt(os, *i);});
+        });
+
     runtime_assert(adj.areAllAvailable());
 
     return adj;
@@ -110,7 +112,9 @@ IntraAdjSamples result(Plane plane, IntraAdjSamples &&adj)
 
 /*----------------------------------------------------------------------------*/
 IntraAdjSamples IntraAdjFiltering::exec(
-        State &, Ptr<const Structure::Picture> picture,
+        State &,
+        Ptr<const Structure::Picture> picture,
+        PelCoord coord,
         Plane plane, Log2 size,
         IntraPredictionMode predModeIntra,
         IntraAdjSamples &&adj)
@@ -124,10 +128,32 @@ IntraAdjSamples IntraAdjFiltering::exec(
                     deriveMinDistVerHor(predModeIntra),
                     deriveIntraHorVerDistThres(size));
 
+    const LogId logId[] =
+    {
+        LogId::IntraAdjFilteredSamplesY,
+        LogId::IntraAdjFilteredSamplesCb,
+        LogId::IntraAdjFilteredSamplesCr
+    };
+
+    log(
+        logId[int(plane)],
+        [&](std::ostream &oss)
+        {
+            oss << "coord " << coord;
+            oss << " filterFlag " << filterFlag << '\n';
+        });
+
     if(filterFlag)
     {
         const auto biIntFlag = deriveBiIntFlag(*picture, plane, size, adj);
         const auto topLeft = *adj[{-1_pel, -1_pel}];
+
+        log(
+            logId[int(plane)],
+            [&](std::ostream &oss)
+            {
+                oss << "biIntFlag " << biIntFlag << '\n';
+            });
 
         if(biIntFlag)
         {

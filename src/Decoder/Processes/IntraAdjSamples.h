@@ -1,5 +1,4 @@
-#ifndef HEVC_Decoder_Processes_IntraAdjSamples_h
-#define HEVC_Decoder_Processes_IntraAdjSamples_h
+#pragma once
 
 /* STDC++ */
 #include <ostream>
@@ -183,5 +182,3 @@ protected:
 };
 /*----------------------------------------------------------------------------*/
 }} /* HEVC::Decoder */
-
-#endif /* HEVC_Decoder_Processes_IntraAdjSamples_h */

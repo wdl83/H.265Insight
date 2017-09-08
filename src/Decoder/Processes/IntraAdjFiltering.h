@@ -15,7 +15,9 @@ struct IntraAdjFiltering
     static const auto id = ProcessId::IntraAdjFiltering;
 
     IntraAdjSamples exec(
-            State &, Ptr<const Structure::Picture>,
+            State &,
+            Ptr<const Structure::Picture>,
+            PelCoord,
             Plane, Log2,
             IntraPredictionMode,
             IntraAdjSamples &&);

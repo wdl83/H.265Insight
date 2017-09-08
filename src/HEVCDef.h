@@ -624,6 +624,10 @@ enum class IntraPredictionMode
 inline
 int toPredAngle(IntraPredictionMode predModeIntra)
 {
+    /* ITU-T H.265 v4 (12/2016)
+     * 8.4.4.2.6 "Specification of intra prediction mode in the range of INTRA_ANGULAR2..INTRA_ANGULAR34"
+     * Table 8-5 */
+
     typedef EnumRange<
         IntraPredictionMode,
         IntraPredictionMode::BeginAngular,
@@ -631,10 +635,7 @@ int toPredAngle(IntraPredictionMode predModeIntra)
 
     bdryCheck(AngularRange::encloses(predModeIntra));
 
-    /* 04/2013,
-     * "Specification of intra prediction mode in range of
-     * INTRA_ANGULAR2.. INTRA_ANGULAR34", Table 8-4 */
-    static const std::array<int, AngularRange::length()> angle =
+    static const std::array<int8_t, AngularRange::length()> angle =
     {
         {
             32, 26, 21, 17, 13, 9, 5, 2, 0,
@@ -653,6 +654,10 @@ int toPredAngle(IntraPredictionMode predModeIntra)
 inline
 int toInvAngle(IntraPredictionMode predModeIntra)
 {
+    /* ITU-T H.265 v4 (12/2016)
+     * 8.4.4.2.6 "Specification of intra prediction mode in the range of INTRA_ANGULAR2..INTRA_ANGULAR34"
+     * Table 8-6 */
+
     typedef EnumRange<
         IntraPredictionMode,
         IntraPredictionMode::Angular11,
@@ -660,10 +665,7 @@ int toInvAngle(IntraPredictionMode predModeIntra)
 
     bdryCheck(InvAngularRange::encloses(predModeIntra));
 
-    /* 04/2013,
-     * "Specification of intra prediction mode in range of
-     * INTRA_ANGULAR2.. INTRA_ANGULAR34", Table 8-5 */
-    static const std::array<int, InvAngularRange::length()> invAngle =
+    static const std::array<int16_t, InvAngularRange::length()> invAngle =
     {
         {
             -4096, -1638, -910, -630, -482, -390, -315,

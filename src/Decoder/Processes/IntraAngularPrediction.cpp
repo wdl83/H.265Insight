@@ -6,10 +6,14 @@
 namespace HEVC { namespace Decoder { namespace Processes {
 /*----------------------------------------------------------------------------*/
 ReferenceSamples deriveReferenceSamples(
+        PelCoord coord,
         Log2 size, Plane plane,
         IntraPredictionMode predModeIntra,
         const IntraAdjSamples &adj)
 {
+    /* ITU-T H.265 v4 (12/2016)
+     * 8.4.4.2.6 "Specification of intra prediction mode in the range of INTRA_ANGULAR2..INTRA_ANGULAR34" */
+
     // 1
     const auto sideLength = toPel(size);
     const int nTbS = toUnderlying(sideLength);
@@ -23,7 +27,7 @@ ReferenceSamples deriveReferenceSamples(
 
     const auto above = IntraPredictionMode::Angular18 <= predModeIntra;
 
-    // (8-47) or (8-55), x = 0..nTbS
+    // (8-53), (8-61), x = 0..nTbS
     for(auto i = 0_pel; i < sideLength + 1_pel; ++i)
     {
         const auto value =
@@ -38,7 +42,7 @@ ReferenceSamples deriveReferenceSamples(
     {
         const auto invAngle = toInvAngle(predModeIntra);
 
-        // (8-48) or (8-56), x = -1..(nTbS * intraPredAngle) >> 5
+        // (8-54), (8-62), x = -1..(nTbS * intraPredAngle) >> 5
         for(auto i = Pel{extendBy}; 0_pel > i; ++i)
         {
             const int ii = toUnderlying(i);
@@ -53,7 +57,7 @@ ReferenceSamples deriveReferenceSamples(
     }
     else
     {
-        // (8-49) or (8-57), x = nTbS + 1..2 * nTbS
+        // (8-55) or (8-63), x = nTbS + 1..2 * nTbS
         for(auto i = sideLength + 1_pel; i < sideLength * 2 + 1_pel; ++i)
         {
             const auto value =
@@ -66,11 +70,12 @@ ReferenceSamples deriveReferenceSamples(
     }
 
     const auto toStr =
-        [&refSamples](std::ostream &oss)
+        [&](std::ostream &oss)
         {
+            oss << "coord " << coord << '\n';
             refSamples.writeTo(
-                    oss,
-                    [](std::ostream &os, ReferenceSamples::Sample i) {pelFmt(os, i);});
+                oss,
+                [](std::ostream &os, ReferenceSamples::Sample i) {pelFmt(os, i);});
         };
 
     const LogId logId[] =
@@ -94,10 +99,10 @@ void IntraAngularPrediction::exec(
         bool disableIntraBoundaryFilter,
         const IntraAdjSamples &adj)
 {
-    /* 8.4.4.2.6, "Specification of intra prediction mode in range
-     * of INTRA_ANGULAR2.. INTRA_ANGULAR34" */
+    /* ITU-T H.265 v4 (12/2016)
+     * 8.4.4.2.6 "Specification of intra prediction mode in the range of INTRA_ANGULAR2..INTRA_ANGULAR34" */
     // 1
-    const auto refSamples = deriveReferenceSamples(size, plane, predModeIntra, adj);
+    const auto refSamples = deriveReferenceSamples(coord, size, plane, predModeIntra, adj);
     // 2
     const auto sideLength = toPel(size);
     const int nTbS = toUnderlying(sideLength);
@@ -111,15 +116,7 @@ void IntraAngularPrediction::exec(
         : IntraPredictionMode::Angular10 == predModeIntra;
 
     const auto filter =
-        [
-            plane,
-            bitDepth,
-            disableIntraBoundaryFilter,
-            &adj,
-            nTbS,
-            above,
-            adjTopLeft,
-            angle0](Pel x, Pel y, int value)
+        [&](Pel x, Pel y, int value)
         {
             if(
                     !disableIntraBoundaryFilter
@@ -132,7 +129,7 @@ void IntraAngularPrediction::exec(
                 const auto adjValue1 = above ?  *adj[{0_pel, -1_pel}] :  *adj[{-1_pel, 0_pel}];
                 const auto adjValue2 = above ? *adj[{-1_pel, y}] : *adj[{x, -1_pel}];
 
-                // (8-54) or (8-62)
+                // (8-60) or (8-68)
                 const auto filtered =
                     clip1(bitDepth, adjValue1 + ((adjValue2 - adjTopLeft) >> 1));
 
@@ -152,16 +149,15 @@ void IntraAngularPrediction::exec(
             const auto i = above ? y : x;
             const auto ii = toUnderlying(i);
             const auto j = above ? x : y;
-            //const auto jj = toUnderlying(j);
 
             // 2a
-            // (8-50) or (8-58)
+            // (8-56), (8-64)
             const auto iIdx = ((ii + 1) * predAngle) >> 5;
-            // (8-51) or (8-59)
+            // (8-57), (8-65)
             const auto iFact = ((ii + 1) * predAngle) & 31;
 
             // 2b
-            // (8-52), (8-53) or (8-60), (8-61)
+            // (8-58), (8-59) or (8-66), (8-67)
             const auto value =
                 0 == iFact
                 ? refSamples[{j + Pel{iIdx} + 1_pel}]

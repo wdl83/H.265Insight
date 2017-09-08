@@ -4,12 +4,23 @@
 
 namespace HEVC { namespace Decoder { namespace Processes {
 /*----------------------------------------------------------------------------*/
+/* ITU-T H.265 v4 (12/2016)
+ * Table 8-3 */
+static
+const std::array<int8_t, EnumRange<IntraPredictionMode>::length()> to422 =
+{
+    {
+        0, 1, 2, 2, 2, 2, 3, 5, 7, 8, 10, 12, 13, 15, 17, 18, 19, 20,
+        21, 22, 23, 23, 24, 24, 25, 25, 26, 27, 27, 28, 28, 29, 29, 30, 31
+    }
+};
+
 CuIntraPredMode IntraChromaPredictionMode::exec(
         State &, Ptr<const Structure::Picture> picture,
         const Syntax::CodingUnit &cu)
 {
-    /* 04/2013, 8.4.3 "Derivation process for chroma intra prediction mode"
-     * 10/2014, 8.4.3 "Derivation process for chroma intra prediction mode" */
+    /* ITU-T H.265 v4 (12/2016)
+     * 8.4.3 "Derivation process for chroma intra prediction mode" */
     using namespace Syntax;
 
     typedef CodingUnit CU;
@@ -19,16 +30,6 @@ CuIntraPredMode IntraChromaPredictionMode::exec(
     const auto is444 = ChromaFormatIdc::f444 == chromaFormatIdc;
 
     runtime_assert(ChromaFormatIdc::fSCP != chromaFormatIdc);
-
-    /* 10/2014, 8.4.3 "Derivation process for chroma intra prediction mode"
-     * Table 8-3 */
-    const std::array<int, EnumRange<IntraPredictionMode>::length()> to422 =
-    {
-        {
-            0, 1, 2, 2, 2, 2, 3, 5, 7, 8, 10, 12, 13, 15, 17, 18, 19, 20,
-            21, 22, 23, 23, 24, 24, 25, 25, 26, 27, 27, 28, 28, 29, 29, 30, 31
-        }
-    };
 
     const auto size = cu.get<CU::Size>()->inUnits();
     const PartitionMode partMode = *cu.get<CU::PartModePseudo>();
@@ -40,7 +41,7 @@ CuIntraPredMode IntraChromaPredictionMode::exec(
         const PelCoord offset
         {
             0 == i % 2 ? 0_pel : toPel(size - 1_log2),
-              0 == i / 2 ? 0_pel : toPel(size - 1_log2)
+            0 == i / 2 ? 0_pel : toPel(size - 1_log2)
         };
 
         const auto intraChromaPredMode =
@@ -88,7 +89,7 @@ CuIntraPredMode IntraChromaPredictionMode::exec(
                 }
             case 4:
                 {
-                    // default value of mode
+                    // modeIdx == IntraPredModeY
                     break;
                 }
         }

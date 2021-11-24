@@ -45,7 +45,7 @@ YUV images produced by **i265** can be viewed by **YUVViewer** (http://www.mlynk
 Two output modes are supported **discrete** and **continuous**.
 
 ## author:
-Wlodzimierz Lipert https://github.com/vlad83
+Wlodzimierz Lipert https://github.com/wdl83
 ## contributors:
 Michal Bartkowiak https://github.com/miszak
 Karol Wozniak https://github.com/attugit

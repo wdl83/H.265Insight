@@ -3,7 +3,7 @@ HEVC v2 / ITU-T H.265 v2 (10/2014) decoding process analyzer.
 
 **i265** implements decoding process as defined by **ITU-T H.265** (http://www.itu.int/rec/T-REC-H.265-201504-I/en).
 
-[![Build Status](https://api.travis-ci.org/vlad83/H.265Insight.svg?branch=master)](https://travis-ci.org/vlad83/H.265Insight)
+[![Build Status](https://api.travis-ci.com/wdl83/H.265Insight.svg?branch=master)](https://travis-ci.com/wdl83/H.265Insight)
 
 ### Deviation from ITU-T H.265 v2 (10/2014) and v3 (04/2015) specifications
 
@@ -11,13 +11,13 @@ HEVC v2 / ITU-T H.265 v2 (10/2014) decoding process analyzer.
 
 ## Requirements
 
-- C++11 conformant compiler. Project is being built with GCC 4.9.3/5.4.0/6.1.1 and CLANG 3.8.0 (https://travis-ci.org/vlad83/H.265Insight)
+- C++11 conformant compiler. Project is being built with GCC 4.9.3/5.4.0/6.1.1 and CLANG 3.8.0 (https://travis-ci.com/wdl83/H.265Insight)
 - CMake
 - POSIX API and GNU extensions, required by TerminationTools (backtrace pretty printer, can be easily disabled)
 
 ## Installation
 ```
-git clone https://github.com/vlad83/H.265Insight
+git clone https://github.com/wdl83/H.265Insight
 mkdir obj
 cd obj
 cmake -DCMAKE_BUILD_TYPE=RELEASE ../H.265Insight
@@ -30,7 +30,7 @@ make
 
 Verification of complete set of **HEVC v1 conformance streams**
 provided by **JCTVC** at http://wftp3.itu.int/av-arch/jctvc-site/bitstream_exchange/draft_conformance/HEVC_v1
-is available in RELEASE builds at https://travis-ci.org/vlad83/H.265Insight
+is available in RELEASE builds at https://travis-ci.com/wdl83/H.265Insight
 
 ## Example
 
